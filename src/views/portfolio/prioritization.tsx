@@ -6,8 +6,9 @@ import { toast } from "sonner";
 import { api, useApi } from "@/lib/client";
 import { money, num } from "@/lib/constants";
 import {
-  LoadingBlock, ErrorBlock, EmptyState, Button, Badge, Input, cn,
+  PageHeader, SectionCard, StatCard, LoadingBlock, ErrorBlock, EmptyState, Button, Badge, Input, cn,
 } from "@/components/pmct/kit";
+import { Label } from "@/components/ui/label";
 import { Sparkles, Target } from "lucide-react";
 
 interface Row { project: { id: string; code: string; name: string; ragStatus: string }; score: { weightedScore: number; systemScore: number; classification: string; overridden: boolean; overrideReason: string | null; overrideBy: string | null; scores: Record<string, number>; costEstimate: number; expectedValue: number } | null }
