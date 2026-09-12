@@ -59,6 +59,7 @@ const NAV: NavGroup[] = [
   {
     label: "Control", items: [
       { label: "Financials", href: "/financials", icon: Wallet, perm: "financial.view" },
+      { label: "Investment & Business Case", href: "/investment", icon: TrendingUp, perm: "financial.view" },
       { label: "EVM", href: "/evm", icon: TrendingUp, perm: "evm.view" },
       { label: "Health", href: "/health", icon: HeartPulse, perm: "evm.view" },
       { label: "RAID", href: "/raid", icon: ShieldAlert, perm: "project.view" },
