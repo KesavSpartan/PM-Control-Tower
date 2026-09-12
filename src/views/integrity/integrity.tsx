@@ -206,7 +206,7 @@ export default function IntegrityView() {
       )}
 
       {/* FRESHNESS */}
-      {tab === "Freshness" && (fresh.loading && !fresh.data ? <LoadingBlock label="Computing live freshness…" /> : fresh.error ? <ErrorBlock message={fresh.error} onRetry={fresh.refetch} /> : (
+      {tab === "Freshness" && (!fresh.data ? <LoadingBlock /> : fresh.error ? <ErrorBlock message={fresh.error} onRetry={fresh.refetch} /> : (
         <div className="space-y-3">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCard label="Projects" value={fresh.data!.projects.length} />
@@ -234,7 +234,7 @@ export default function IntegrityView() {
       ))}
 
       {/* EVIDENCE */}
-      {tab === "Evidence" && (bundles.loading && !bundles.data ? <LoadingBlock /> : bundles.error ? <ErrorBlock message={bundles.error} onRetry={bundles.refetch} /> : (
+      {tab === "Evidence" && (!bundles.data ? <LoadingBlock /> : bundles.error ? <ErrorBlock message={bundles.error} onRetry={bundles.refetch} /> : (
         <SectionCard title="Evidence bundle registry" description="SHA-256 hash chain across every baseline, decision, timesheet and audit record — tampering breaks the chain visibly.">
           {bundles.data!.bundles.length === 0 ? <EmptyState title="No bundles yet" description="Export a bundle to create an audit-grade, tamper-evident record." /> : (
             <div className="space-y-2">
@@ -323,7 +323,7 @@ export default function IntegrityView() {
       )}
 
       {/* CALIBRATION */}
-      {tab === "Calibration" && (calib.loading && !calib.data ? <LoadingBlock /> : calib.error ? <ErrorBlock message={calib.error} onRetry={calib.refetch} /> : (
+      {tab === "Calibration" && (!calib.data ? <LoadingBlock /> : calib.error ? <ErrorBlock message={calib.error} onRetry={calib.refetch} /> : (
         <div className="space-y-3">
           <SectionCard title="Say/Do reliability — the organizational memory of estimation bias" description={calib.data!.advisory}
             actions={canManage && <Button variant="outline" size="sm" disabled={busy} onClick={() => void recomputeCalib()}><RefreshCw className="h-3.5 w-3.5 mr-1" />Recompute</Button>}>
@@ -349,7 +349,7 @@ export default function IntegrityView() {
       ))}
 
       {/* SCENARIOS */}
-      {tab === "Scenarios" && (scenarios.loading && !scenarios.data ? <LoadingBlock /> : scenarios.error ? <ErrorBlock message={scenarios.error} onRetry={scenarios.refetch} /> : (
+      {tab === "Scenarios" && (!scenarios.data ? <LoadingBlock /> : scenarios.error ? <ErrorBlock message={scenarios.error} onRetry={scenarios.refetch} /> : (
         <div className="space-y-3">
           {canScenario && (
             <SectionCard title="Scenario sandbox — test decisions on a clone before committing" description="Fork a project, change it, watch the quantified trade-off. Production dashboards never read sandbox rows.">
@@ -397,7 +397,7 @@ export default function IntegrityView() {
       ))}
 
       {/* AI ACTIONS */}
-      {tab === "AI Actions" && (aiActions.loading && !aiActions.data ? <LoadingBlock /> : aiActions.error ? <ErrorBlock message={aiActions.error} onRetry={aiActions.refetch} /> : (
+      {tab === "AI Actions" && (!aiActions.data ? <LoadingBlock /> : aiActions.error ? <ErrorBlock message={aiActions.error} onRetry={aiActions.refetch} /> : (
         <SectionCard title="Agentic work products — drafted by AI, decided by humans" description="Every draft records its trigger; every decision records its reviewer. Nothing auto-executes."
         actions={canManage && effProjectId && (
           <Button variant="outline" size="sm" disabled={busy} onClick={() => void createApprovalLink()}>
@@ -436,7 +436,7 @@ export default function IntegrityView() {
       ))}
 
       {/* BENEFITS */}
-      {tab === "Benefits" && (benefits.loading && !benefits.data ? <LoadingBlock /> : benefits.error ? <ErrorBlock message={benefits.error} onRetry={benefits.refetch} /> : (
+      {tab === "Benefits" && (!benefits.data ? <LoadingBlock /> : benefits.error ? <ErrorBlock message={benefits.error} onRetry={benefits.refetch} /> : (
         <div className="space-y-3">
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <StatCard label="Value promised" value={money(benefits.data!.totals.promised)} icon={<Trophy className="h-4 w-4" />} />
@@ -489,7 +489,7 @@ export default function IntegrityView() {
       ))}
 
       {/* DATA QUALITY */}
-      {tab === "Data Quality" && (dq.loading && !dq.data ? <LoadingBlock /> : dq.error ? <ErrorBlock message={dq.error} onRetry={dq.refetch} /> : (
+      {tab === "Data Quality" && (!dq.data ? <LoadingBlock /> : dq.error ? <ErrorBlock message={dq.error} onRetry={dq.refetch} /> : (
         <div className="space-y-3">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCard label="Average data quality" value={dq.data!.averageScore + "/100"} tone={dq.data!.averageScore >= 80 ? "good" : dq.data!.averageScore >= 60 ? "warn" : "bad"} />
