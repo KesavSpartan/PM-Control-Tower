@@ -235,13 +235,13 @@ test("scenario: rebase applies duration delta to drifted current", () => {
   const { rebased, decisions } = rebaseOverrides(snap, { durationChanges: { B: 45 }, removeAssignments: ["a1"] }, current);
   assert.equal(rebased.durationChanges!["B"], 55); // delta +25 applied to current 30
   assert.equal(rebased.removeAssignments!.length, 1);
-  assert.ok(decisions.some((d) => d.kind === "REBASED"));
+  assert.ok(decisions.some((d) => d!.kind === "REBASED"));
 });
 test("scenario: rebase skips assignments already gone in production", () => {
   const current = { tasks: snap.tasks, assignmentIds: new Set<string>() };
   const { rebased, decisions } = rebaseOverrides(snap, { removeAssignments: ["a1"] }, current);
   assert.equal(rebased.removeAssignments!.length, 0);
-  assert.ok(decisions.some((d) => d.kind === "SKIPPED"));
+  assert.ok(decisions.some((d) => d!.kind === "SKIPPED"));
 });
 
 // ---------- v1.5.0 PRIORITIZATION ----------
