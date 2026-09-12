@@ -2,7 +2,7 @@
 // PM CONTROL TOWER — EXECUTIVE CONTROL TOWER (dashboard)
 // One source of truth: every figure originates from operational project data.
 
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { useApi, useRealtimeRefetch } from "@/lib/client";
 import { PageHeader, StatCard, SectionCard, StatusChip, LoadingBlock, ErrorBlock, ProgressBar, SeverityDot, EmptyState, RagBadge, Button } from "@/components/pmct/kit";
 import { money, num, fmtDate } from "@/lib/constants";
@@ -318,7 +318,7 @@ export default function Dashboard() {
             )}
           </div>
           <div className="mt-6">
-            <FreshnessRail />
+            <RailErrorBoundary><FreshnessRail /></RailErrorBoundary>
           </div>
           <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400 mt-4">One Platform · Complete Project Intelligence · Greater Outcomes</p>
         </div>
@@ -349,4 +349,11 @@ function FreshnessRail() {
       </div>
     </SectionCard>
   );
+}
+
+class RailErrorBoundary extends React.Component<{ children: React.ReactNode }, { err: string | null }> {
+  state = { err: null };
+  static getDerivedStateFromError(e: unknown) { return { err: e instanceof Error ? e.message : String(e) }; }
+  componentDidCatch(e: unknown) { console.error('[FreshnessRail] suppressed render error:', e); }
+  render() { return this.state.err ? null : this.props.children; }
 }
