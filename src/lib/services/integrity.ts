@@ -8,7 +8,7 @@ import { computeFreshness, FreshnessResult } from "@/lib/engines/freshness";
 import { buildChain, verifyChain, EvidenceDoc } from "@/lib/engines/evidence";
 import { runSimulation } from "@/lib/engines/montecarlo";
 import { computeFactors } from "@/lib/engines/calibration";
-import { rollupBenefits } from "@/lib/engines/benefits";
+import { rollupBenefits, strategicHealth } from "@/lib/engines/benefits";
 import { applyOverrides, computeScenarioDiff, deepClone, rebaseOverrides, ScenarioOverrides, ScenarioSnapshot } from "@/lib/engines/scenario";
 
 export async function getFreshnessConfig() {
@@ -289,11 +289,11 @@ export async function benefitsRollupForProject(projectId: string) {
 
 export async function portfolioBenefitsRollup() {
   const projects = await db.project.findMany({ select: { id: true, code: true, name: true, ragStatus: true } });
-  const out: Array<{ project: { id: string; code: string; name: string; ragStatus: string }; profiles: any[]; rollup: ReturnType<typeof rollupBenefits> }> = [];
+  const out: Array<{ project: { id: string; code: string; name: string; ragStatus: string }; profiles: any[]; rollup: ReturnType<typeof rollupBenefits>; strategic: ReturnType<typeof strategicHealth> }> = [];
   for (const p of projects) {
     const r = await benefitsRollupForProject(p.id);
     if (r.profiles.length === 0) continue;
-    out.push({ project: p, ...r });
+    out.push({ project: p, ...r, strategic: strategicHealth(p.ragStatus, r.rollup.realizationPct, r.rollup.activeProfiles) });
   }
   return out;
 }
