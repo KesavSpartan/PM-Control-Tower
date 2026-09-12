@@ -1665,3 +1665,32 @@ model ReportSubscription {
 
   @@unique([userId, templateId])
 }
+
+// ============ INVESTMENT & BUSINESS CASE (v1.7.0) ============
+
+model BusinessCase {
+  id              String   @id @default(cuid())
+  name            String
+  projectId       String?
+  sponsor         String
+  businessUnit    String?
+  strategicObjective String?
+  currency        String   @default("USD")
+  analysisYears   Int      @default(5)
+  discountRatePct Float    @default(8)
+  capexItemsJson  String   @default("[]")  // [{category,description,amount,year,vendor,costCenter}]
+  opexItemsJson   String   @default("[]")  // [{category,description,annualAmount,startYear,endYear,escalationPct}]
+  benefitItemsJson String  @default("[]") // [{name,type,annualValue,startYear,growthPct,confidencePct,owner}]
+  computedJson    String   @default("{}")
+  recommendation  String   @default("REVIEW") // STRONG_INVEST | INVEST | REVIEW | CONDITIONAL | DO_NOT_INVEST
+  status          String   @default("DRAFT") // DRAFT | SUBMITTED | PMO_REVIEW | FINANCE_REVIEW | CFO_REVIEW | APPROVED | REJECTED | CONDITIONAL | FUNDED
+  approvedAmount  Float?
+  decidedBy       String?
+  decidedAt       DateTime?
+  decisionComment String?
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+}

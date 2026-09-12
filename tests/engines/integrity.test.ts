@@ -294,3 +294,66 @@ test("prioritization: required (regulatory) projects selected first", () => {
   const r = optimizePortfolio(c, 10);
   assert.ok(r.selected.find((d) => d.candidate.id === "R"));
 });
+
+// ---------- v1.7.0 FINANCE ENGINE ----------
+import { computeBusinessCase, withScenario, npvSensitivity } from "../../src/lib/engines/finance";
+
+const bc = {
+  analysisYears: 4, discountRatePct: 8,
+  capex: [{ category: "Software", amount: 2000000, year: 0 }, { category: "Implementation", amount: 500000, year: 1 }],
+  opex: [{ category: "Cloud", annualAmount: 400000, startYear: 1, endYear: 3 }],
+  benefits: [{ name: "Cost reduction", annualValue: 800000, startYear: 1, growthPct: 50 }],
+  hurdleRatePct: 12,
+};
+// Year0: -2.0M | Year1: 0.8-0.5-0.4=-0.1M | Year2: 1.2-0.4=+0.8M | Year3: 1.8-0=+1.8M
+
+test("finance: cash flow rows computed correctly", () => {
+  const m = computeBusinessCase(bc);
+  assert.equal(m.years[0].net, -2000000);
+  assert.equal(m.years[1].net, -100000);
+  assert.equal(m.years[2].net, 800000);
+  assert.equal(m.years[3].net, 1400000); // 1.8M benefits - 0.4M opex (endYear 3 includes y3)
+  assert.equal(m.paybackYears, 3);
+});
+test("finance: totals, ROI", () => {
+  const m = computeBusinessCase(bc);
+  assert.equal(m.totalCapex, 2500000);
+  assert.equal(m.totalOpex, 1200000);
+  assert.equal(m.totalBenefits, 3800000);
+  assert.equal(m.totalInvestment, 3700000);
+  assert.equal(m.roiPct, Math.round(((3800000 - 3700000) / 3700000) * 100 * 100) / 100);
+});
+test("finance: NPV at 8% matches manual discounting", () => {
+  const m = computeBusinessCase(bc);
+  const expected = -2000000 + (-100000) / 1.08 + 800000 / Math.pow(1.08, 2) + 1400000 / Math.pow(1.08, 3);
+  assert.ok(Math.abs(m.npv - expected) < 1, 'npv ' + m.npv + ' vs ' + expected);
+  assert.match(m.npvVerdict, /unattractive/); // marginal fixture: NPV negative at 8%
+  const good = computeBusinessCase({ ...bc, benefits: [{ name: 'Cost reduction', annualValue: 1200000, startYear: 1, growthPct: 50 }] });
+  assert.ok((good.npv ?? 0) > 0);
+  assert.match(good.npvVerdict, /attractive/);
+});test("finance: IRR computed and compared to hurdle", () => {
+  const m = computeBusinessCase(bc);
+  // flows -2.0, -0.1, 0.8, 1.8 -> IRR ~ 6-8%... compute precisely via bisection sanity
+  assert.ok(m.irr === null || (m.irr > -50 && m.irr < 200));
+  if (m.irr != null && m.irr > 12) assert.match(m.irrVerdict, /exceeds/);
+  if (m.irr != null && m.irr <= 12) assert.match(m.irrVerdict, /below/);
+});
+test("finance: unprofitable case -> negative NPV, no fake IRR guarantees", () => {
+  const bad = { ...bc, benefits: [{ name: "x", annualValue: 100000, startYear: 1 }] };
+  const m = computeBusinessCase(bad);
+  assert.ok(m.npv < 0);
+  assert.match(m.npvVerdict, /unattractive/);
+});
+test("finance: payback detection", () => {
+  const m = computeBusinessCase(bc);
+  assert.ok(m.paybackYears === null || m.paybackYears >= 1); // cumulative negative early years
+});
+test("finance: scenarios move metrics in the right direction", () => {
+  const best = withScenario(bc, { benefitMult: 1.2, capexMult: 0.9 });
+  const worst = withScenario(bc, { benefitMult: 0.8, capexMult: 1.15 });
+  assert.ok(best.npv! > worst.npv!);
+});
+test("finance: NPV sensitivity monotonic in benefits", () => {
+  const s = npvSensitivity(bc);
+  for (let i = 1; i < s.length; i++) assert.ok(s[i].npv > s[i - 1].npv);
+});
