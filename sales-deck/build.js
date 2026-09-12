@@ -69,7 +69,7 @@ s.addText([
   { text: "One platform. Complete project intelligence. ", options: { color: "D7E2F2" } },
   { text: "Greater outcomes.", options: { color: AMBER } },
 ], { x: M, y: 4.15, w: 9.4, h: 0.55, fontFace: F, fontSize: 24, bold: true, margin: 0 });
-s.addText("Portfolio → Program → Project → Delivery — one source of truth for scope, schedule, cost, risk, EVM and governance. Self-hosted, realtime, audit-ready — now with the Integrity Layer: honest staleness, evidence chains, P80 forecasting, benefits realization.", { x: M, y: 4.85, w: 8.2, h: 0.75, fontFace: F, fontSize: 14, color: MUT_D, margin: 0 });
+s.addText("Portfolio → Program → Project → Delivery — one source of truth for scope, schedule, cost, risk, EVM and governance. Self-hosted, realtime, audit-ready — Integrity Layer, P80 forecasting, investment & business case analysis (ROI · NPV · IRR · payback) and benefits realization.", { x: M, y: 4.85, w: 8.2, h: 0.75, fontFace: F, fontSize: 14, color: MUT_D, margin: 0 });
 s.addShape(p.shapes.LINE, { x: M, y: 6.35, w: 3.2, h: 0, line: { color: "27405F", width: 1 } });
 s.addText("dynamiq Solutions  ·  Corporate Sales Presentation  ·  2026", { x: M, y: 6.5, w: 8, h: 0.3, fontFace: F, fontSize: 12, color: MUT_D, margin: 0 });
 
