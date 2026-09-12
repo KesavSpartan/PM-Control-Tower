@@ -200,6 +200,7 @@ model Project {
   scenarios        Scenario[]
   aiActions        AiAction[]
   benefitProfiles  BenefitProfile[]
+  projectScore     ProjectScore?
 }
 
 // ============ PLANNING: SCOPE → WBS → TASKS ============
@@ -1566,4 +1567,45 @@ model AiKnowledge {
 
   @@unique([day, content])
   @@index([day])
+}
+
+// ============ PRIORITIZATION & PORTFOLIO SELECTION (v1.5.0) ============
+
+model PriorityCriterion {
+  id      String @id @default(cuid())
+  name    String
+  weight  Float
+  order   Int    @default(0)
+  modelId String @default("default")
+  @@index([modelId])
+}
+
+model ProjectScore {
+  id            String   @id @default(cuid())
+  projectId     String
+  scoresJson    String   // { criterionId: 0-100 }
+  weightedScore Float
+  classification String  // CRITICAL | HIGH | MEDIUM | LOW | DEFER
+  overrideScore Float?
+  overrideReason String?
+  overrideBy    String?
+  costEstimate  Float    @default(0)
+  expectedValue Float    @default(0)
+  scoredAt      DateTime @default(now()) @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId])
+}
+
+model PortfolioScenario {
+  id           String   @id @default(cuid())
+  name         String
+  budget       Float
+  maxProjects  Int?
+  selectedJson String
+  excludedJson String
+  totalScore   Float
+  invested     Float
+  createdAt    DateTime @default(now())
 }

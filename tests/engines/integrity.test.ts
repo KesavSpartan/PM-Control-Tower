@@ -243,3 +243,54 @@ test("scenario: rebase skips assignments already gone in production", () => {
   assert.equal(rebased.removeAssignments!.length, 0);
   assert.ok(decisions.some((d) => d.kind === "SKIPPED"));
 });
+
+// ---------- v1.5.0 PRIORITIZATION ----------
+import { weightedScore, classify, optimizePortfolio, DEFAULT_CRITERIA, validateWeights } from "../../src/lib/engines/prioritization";
+
+test("prioritization: weighted score matches the spec example", () => {
+  const s = { strategic: 92, value: 85, customer: 90, risk: 70, compliance: 100, roi: 82, urgency: 90 };
+  const score = weightedScore(s, DEFAULT_CRITERIA);
+  assert.equal(score, 86.7); // (92*25+85*20+90*15+70*15+100*10+82*10+90*5)/100 — the spec's 88.4 example does not match its own weights; engine is mathematically exact
+});
+test("prioritization: classification bands", () => {
+  assert.equal(classify(95), "CRITICAL"); assert.equal(classify(85), "HIGH");
+  assert.equal(classify(75), "MEDIUM"); assert.equal(classify(65), "LOW");
+  assert.equal(classify(50), "DEFER");
+});
+test("prioritization: weights must total 100", () => {
+  assert.equal(validateWeights(DEFAULT_CRITERIA), true);
+  assert.equal(validateWeights([...DEFAULT_CRITERIA.slice(1)]), false);
+});
+test("prioritization: optimizer beats greedy-by-score and explains exclusions", () => {
+  const c = [
+    { id: "A", name: "A", score: 92, cost: 3, expectedValue: 10 },
+    { id: "B", name: "B", score: 88, cost: 2, expectedValue: 8 },
+    { id: "C", name: "C", score: 85, cost: 5, expectedValue: 6 },
+    { id: "D", name: "D", score: 82, cost: 4, expectedValue: 7 },
+    { id: "E", name: "E", score: 75, cost: 1, expectedValue: 4 },
+  ];
+  const r = optimizePortfolio(c, 10);
+  const sel = r.selected.map((d) => d.candidate.id).sort().join("");
+  assert.equal(sel, "ABDE");           // B(88/2) beats C(85/5) on density → total value 29 vs 27 for A,C + ...
+  assert.equal(r.totalCost, 10);
+  assert.equal(r.remainingBudget, 0);
+  assert.ok(r.totalScore > 84);
+  assert.equal(r.excluded.find((d) => d.candidate.id === "C").reason.includes("Budget exhausted"), true);
+});
+test("prioritization: dependency guard explains the chain", () => {
+  const c = [
+    { id: "X", name: "Foundation", score: 70, cost: 8, expectedValue: 5 },
+    { id: "Y", name: "Dependent", score: 95, cost: 2, expectedValue: 9, dependsOn: ["X"] },
+  ];
+  const r = optimizePortfolio(c, 5); // budget too small for X
+  assert.equal(r.selected.length, 0);
+  assert.match(r.excluded.find((d) => d.candidate.id === "Y").reason, /Dependency not funded: Foundation/);
+});
+test("prioritization: required (regulatory) projects selected first", () => {
+  const c = [
+    { id: "R", name: "Compliance", score: 60, cost: 4, expectedValue: 2, required: true },
+    { id: "F", name: "Flashy", score: 90, cost: 7, expectedValue: 9 },
+  ];
+  const r = optimizePortfolio(c, 10);
+  assert.ok(r.selected.find((d) => d.candidate.id === "R"));
+});

@@ -38,6 +38,7 @@ const GatesView = L(() => import("@/views/control/gates"));
 const GovernanceView = L(() => import("@/views/control/governance"));
 const IntegrityView = L(() => import("@/views/integrity/integrity"));
 const TechnologyView = L(() => import("@/views/technology/technology"));
+const PrioritizationView = L(() => import("@/views/portfolio/prioritization"));
 
 // --- Intelligence, Connect & Admin views (batch F-C) ---
 const ReportsView = L(() => import("@/views/intelligence/reports"));
@@ -88,6 +89,7 @@ export function renderView(segments: string[]): { C: ComponentType; key: string 
     case "governance": return { C: GovernanceView, key };
     case "integrity": return { C: IntegrityView, key };
     case "technology": return { C: TechnologyView, key };
+    case "prioritization": return { C: PrioritizationView, key };
     case "reports":
       switch (b) {
         case "leadership": return { C: LeadershipView, key };

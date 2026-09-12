@@ -18,7 +18,7 @@ import { Server,
   ArrowLeftRight, ScanSearch, Landmark, BarChart3, LineChart, Sparkles, Plug, Blocks, Workflow, Bell,
   Webhook, BrainCircuit, UserCog, KeyRound, LayoutTemplate, ScrollText, Settings, Search, Plus, Menu,
   Radio, LogOut, CircleUser, TowerControl, Crown,
-  ShieldCheck } from "lucide-react";
+  ShieldCheck, Target } from "lucide-react";
 
 export interface SessionUser {
   id: string; email: string; name: string; isSuperAdmin: boolean;
@@ -67,6 +67,7 @@ const NAV: NavGroup[] = [
       { label: "Governance", href: "/governance", icon: Landmark, perm: "project.view" },
       { label: "Data Integrity", href: "/integrity", icon: ShieldCheck, perm: "integrity.view" },
       { label: "CTO Tower", href: "/technology", icon: Server, perm: "integration.view" },
+      { label: "Prioritization", href: "/prioritization", icon: Target, perm: "portfolio.view" },
     ],
   },
   {
