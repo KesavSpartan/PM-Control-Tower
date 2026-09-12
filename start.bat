@@ -67,6 +67,7 @@ if "%RUNNER%"=="bun" (
     call npx tsx scripts/seed-technology.ts
     call npx tsx scripts/seed-connectors.ts
     call npx tsx scripts/seed-connectors2.ts
+    call npx tsx scripts/seed-reporting.ts
 )
 
 goto :launch
@@ -85,6 +86,7 @@ if "%RUNNER%"=="bun" (
     call npx tsx scripts/seed-technology.ts
     call npx tsx scripts/seed-connectors.ts
     call npx tsx scripts/seed-connectors2.ts
+    call npx tsx scripts/seed-reporting.ts
 )
 echo Done.
 goto :eof
@@ -107,6 +109,7 @@ if "%RUNNER%"=="bun" (
     call npx tsx scripts/seed-technology.ts
     call npx tsx scripts/seed-connectors.ts
     call npx tsx scripts/seed-connectors2.ts
+    call npx tsx scripts/seed-reporting.ts
 )
 echo Database reset and seeded.
 goto :eof

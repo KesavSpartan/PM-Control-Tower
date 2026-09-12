@@ -18,7 +18,7 @@ import { Server,
   ArrowLeftRight, ScanSearch, Landmark, BarChart3, LineChart, Sparkles, Plug, Blocks, Workflow, Bell,
   Webhook, BrainCircuit, UserCog, KeyRound, LayoutTemplate, ScrollText, Settings, Search, Plus, Menu,
   Radio, LogOut, CircleUser, TowerControl, Crown,
-  ShieldCheck, Target } from "lucide-react";
+  ShieldCheck, Target, BookOpen } from "lucide-react";
 
 export interface SessionUser {
   id: string; email: string; name: string; isSuperAdmin: boolean;
@@ -74,6 +74,7 @@ const NAV: NavGroup[] = [
     label: "Intelligence", items: [
       { label: "Leadership Control Tower", href: "/reports/leadership", icon: Crown, perm: "reports.view" },
       { label: "Reports", href: "/reports", icon: BarChart3, perm: "reports.view" },
+      { label: "Reporting Center", href: "/reporting", icon: BookOpen, perm: "reports.view" },
       { label: "Analytics", href: "/analytics", icon: LineChart, perm: "reports.view" },
       { label: "AI PM Assistant", href: "/assistant", icon: Sparkles, perm: "ai.use" },
     ],

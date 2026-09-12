@@ -1609,3 +1609,59 @@ model PortfolioScenario {
   invested     Float
   createdAt    DateTime @default(now())
 }
+
+// ============ ENTERPRISE REPORTING CENTER (v1.6.0) ============
+
+model ReportingTemplate {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  description String
+  category    String   // EXECUTIVE | FINANCE | TECHNOLOGY | PMO | PROJECT | RESOURCE | RISK
+  audience    String   // CEO | CFO | CTO | PMO | PM | ALL
+  purpose     String?
+  kpis        String   @default("[]")   // JSON array of KPI definitions
+  charts      String   @default("[]")   // JSON array of chart specs
+  tables      String   @default("[]")   // JSON array of table specs
+  filters     String   @default("[]")   // JSON array of filter definitions
+  dataSource  String   @default("projects")
+  frequency   String   @default("MONTHLY")
+  ragLogic    String?
+  status      String   @default("PUBLISHED") // DRAFT | REVIEW | APPROVED | PUBLISHED | ARCHIVED
+  version     Int      @default(1)
+  runCount    Int      @default(0)
+  createdBy   String   @default("system")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([audience])
+}
+
+model GeneratedReport {
+  id           String   @id @default(cuid())
+  templateId   String?
+  templateName String
+  category     String
+  generatedBy  String
+  period       String   @default("CURRENT_MONTH")
+  format       String   @default("HTML")
+  dataJson     String   @default("{}")
+  narrative    String?
+  status       String   @default("READY") // QUEUED | READY | FAILED
+  createdAt    DateTime @default(now())
+
+  @@index([templateId])
+  @@index([createdAt])
+}
+
+model ReportSubscription {
+  id         String   @id @default(cuid())
+  userId     String
+  templateId String
+  frequency  String   @default("MONTHLY")
+  format     String   @default("PDF")
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, templateId])
+}
