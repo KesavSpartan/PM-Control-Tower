@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { money, num, fmtDate } from "@/lib/constants";
 import type { ProjectDetailBundle } from "./tabs/types";
 import OverviewTab from "./tabs/OverviewTab";
+import ControlsTab from "./tabs/ControlsTab";
 import ScopeTab from "./tabs/ScopeTab";
 import FinancialsTab from "./tabs/FinancialsTab";
 import EvmTab from "./tabs/EvmTab";
@@ -28,6 +29,7 @@ const TABS = [
   { value: "scope", label: "Scope & Requirements" },
   { value: "wbs", label: "WBS" },
   { value: "schedule", label: "Schedule" },
+    { value: "controls", label: "Controls" },
   { value: "milestones", label: "Milestones" },
   { value: "baselines", label: "Baselines" },
   { value: "financials", label: "Financials" },
@@ -129,6 +131,7 @@ export default function ProjectWorkspace() {
         <TabsContent value="scope"><ScopeTab project={p} /></TabsContent>
         <TabsContent value="wbs"><WbsTree projectId={projectId} /></TabsContent>
         <TabsContent value="schedule"><GanttChart projectId={projectId} /></TabsContent>
+        <TabsContent value="controls"><ControlsTab projectId={projectId} /></TabsContent>
         <TabsContent value="milestones"><MilestonesPanel projectId={projectId} /></TabsContent>
         <TabsContent value="baselines"><BaselinesPanel projectId={projectId} /></TabsContent>
         <TabsContent value="financials"><FinancialsTab projectId={projectId} /></TabsContent>

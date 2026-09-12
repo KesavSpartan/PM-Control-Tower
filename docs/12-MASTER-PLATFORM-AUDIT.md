@@ -34,6 +34,7 @@ Verdict per domain: ✅ exists · 🟡 partial (extend later) · ❌ not built (
 - **§6/§10 Business analyst workspace** — requirements register + deliverables/quality records exist; no traceability matrix / UAT module.
 - **§7 CAPEX/OPEX split, ROI/NPV/IRR/payback** — ✅ v1.7.0: Investment & Business Case module (cash-flow model, ROI, NPV, IRR, payback, scenarios, sensitivity, funding workflow). Invoices/contracts remain future.
 - **§15/§16/§17 Reporting hub** — Leadership Pack + 17 sub-reports + CSV/JSON export exist; no report-template library (150–200) / report builder / scheduler UI (automations cover scheduled alerts).
+- **§10-12/25-26 S-Curve & project controls** — ✅ v1.8.0: Controls tab (S-Curve cost/progress/EV, planned-vs-actual, forecast completion, EVM interpretation) per project; portfolio-level S-curves remain future.
 - **§27 Drill-down** — deep links from tower to projects exist; full KPI→task drill-through is partial.
 - **§30 Navigation** — groups map to the recommended structure except a dedicated Technology/Architecture group.
 
