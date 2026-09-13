@@ -24,6 +24,10 @@ model User {
   phone         String?
   avatarColor   String    @default("#1e3a5f")
   isActive      Boolean   @default(true)
+  mfaEnabled  Boolean @default(false)
+  mfaSecret   String?
+  externalId  String?
+  authSource  String   @default("LOCAL") // LOCAL | OIDC | SAML2
   isSuperAdmin  Boolean   @default(false)
   lastLoginAt   DateTime?
   failedLogins  Int       @default(0)
@@ -1777,4 +1781,31 @@ model AdminSettings {
   confidentialityLabel String @default("CONFIDENTIAL — INTERNAL MANAGEMENT USE ONLY")
   currency             String @default("USD")
   dateFormat           String @default("YYYY-MM-DD")
+}
+
+// ============ IDENTITY & ACCESS (v2.0.0) ============
+
+model IdentityProvider {
+  id              String   @id @default(cuid())
+  protocol        String   // SAML2 | OIDC
+  name            String
+  issuer          String
+  clientId        String?
+  clientSecret    String?
+  ssoUrl          String
+  idpCertificate  String?
+  groupsRoleMappingJson String @default("[]") // [{idpGroup: "PMO Lead", roleCode: "PMO_ADMIN"}]
+  status          String   @default("CONFIGURED") // CONFIGURED | CONNECTED (live-tested)
+  lastTestAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ScimToken {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  label      String
+  active     Boolean  @default(true)
+  lastUsedAt DateTime?
+  createdAt  DateTime @default(now())
 }

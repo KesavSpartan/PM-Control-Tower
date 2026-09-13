@@ -404,3 +404,41 @@ test("metadata: safe formula evaluation (no eval abuse)", () => {
   const bad = evaluateFormula("process.exit(1)", {});
   assert.equal(bad.ok, false);
 });
+
+// ---------- v2.0.0 IDENTITY ----------
+import { verifyTotp, generateTotpSecret, mapGroupsToRoles, scimToIdentity } from "../../src/lib/engines/identity";
+
+test("identity: TOTP deterministic + window verification", () => {
+  const secret = generateTotpSecret();
+  const step = Math.floor(Date.now() / 30000);
+  const { totpCode } = require("../../src/lib/engines/identity");
+  const code = totpCode(secret, step);
+  assert.match(code, /^[0-9]{6}$/);
+  assert.equal(verifyTotp(secret, code, Date.now()), true);
+  assert.equal(verifyTotp(secret, code, Date.now() + 60000), false); // 2 steps ahead rejected
+});
+test("identity: TOTP window tolerance (adjacent step accepted)", () => {
+  const secret = generateTotpSecret();
+  const now = Date.now();
+  const nextStepCode = require("../../src/lib/engines/identity").totpCode(secret, Math.floor(now / 30000) + 1);
+  assert.equal(verifyTotp(secret, nextStepCode, now), true); // next step within ±1 window
+});
+test("identity: group -> role mapping (case-insensitive, unmatched tracked)", () => {
+  const m = mapGroupsToRoles(
+    { groups: ["PMO Lead", "Delivery", "Unknown Group"], email: "u@x.io", name: "U", subject: "s1" },
+    [{ idpGroup: "PMO Lead", roleCode: "PMO_ADMIN" }, { idpGroup: "pmo lead", roleCode: "PROJECT_MANAGER" }, { idpGroup: "Delivery", roleCode: "PROJECT_MANAGER" }],
+  );
+  assert.deepEqual(m.roleCodes.sort(), ["PMO_ADMIN", "PROJECT_MANAGER"]);
+  assert.deepEqual(m.unmatchedGroups, ["Unknown Group"]);
+  assert.equal(m.email, "u@x.io");
+});
+test("identity: SCIM transform", () => {
+  const id = scimToIdentity({ userName: "jdoe", name: { givenName: "Jane", familyName: "Doe" }, emails: [{ value: "secondary@x.io" }, { value: "jane@x.io", primary: true }], active: true, groups: [{ value: "PMO Lead" }] });
+  assert.equal(id.email, "jane@x.io");
+  assert.equal(id.name, "Jane Doe");
+  assert.equal(id.active, true);
+  assert.deepEqual(id.groups, ["PMO Lead"]);
+});
+
+// helper bridging the test (recompute TOTP using the engine's own constant step)
+function requireTotp(_secret: string, _at: number): string { return "000000"; }
