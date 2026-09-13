@@ -1309,6 +1309,7 @@ model ReportSchedule {
   deliveryChannel String   @default("IN_APP")
   isActive       Boolean   @default(true)
   lastRunAt      DateTime?
+  templateId     String?
   nextRunAt      DateTime?
   lastRunSummary String?
   createdByName  String?

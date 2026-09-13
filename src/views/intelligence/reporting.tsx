@@ -9,7 +9,8 @@ import { money, num } from "@/lib/constants";
 import {
   PageHeader, SectionCard, StatCard, StatusChip, LoadingBlock, ErrorBlock, EmptyState, Button, Badge, Input, cn,
 } from "@/components/pmct/kit";
-import { BookOpen, Play, Star, Clock, FileBarChart } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { BookOpen, Save, Trash2, Play, Star, Clock, FileBarChart } from "lucide-react";
 
 interface Tpl { id: string; code: string; name: string; description: string; category: string; audience: string; kpis: string; charts: string; tables: string; frequency: string; runCount: number }
 interface LibraryData { templates: Tpl[]; categories: { category: string; count: number }[]; total: number }
@@ -27,6 +28,8 @@ export default function ReportingCenterView() {
     try { setViewReport(await api.get("/api/reporting/" + id)); } catch (e) { toast.error(e instanceof Error ? e.message : "Open failed"); }
   };
   const [busy, setBusy] = useState(false);
+  const [newComponents, setNewComponents] = useState<{ type: string; title: string; dataSource?: string }[]>([]);
+  const [newRptName, setNewRptName] = useState("");
   const [favs, setFavs] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     return JSON.parse(window.localStorage.getItem("pmct.report.favs") || "[]");
@@ -36,6 +39,8 @@ export default function ReportingCenterView() {
   const lib = useApi<LibraryData>(section === "Library" ? query : null);
   const history = useApi<{ reports: GenReport[] }>(section === "History" || section === "My Reports" ? "/api/reporting?history=1" : null);
   const packData = useApi<{ packs: { id: string; name: string; createdAt: string; pages: { title: string }[] }[] }>(section === "Board Packs" ? "/api/reporting/boardpacks" : null);
+  const customRpts = useApi<{ customReports: { id: string; name: string; category: string; componentsJson: string }[] }>(section === "Report Builder" || section === "Administration" ? "/api/reporting/custom" : null);
+  const subsData = useApi<{ subscriptions: { id: string; templateId: string; frequency: string; format: string }[]; templates: { id: string; name: string; category: string }[] }>(section === "Subscriptions" ? "/api/reporting/subs" : null);
   const schedData = useApi<{ schedules: { id: string; templateId: string; frequency: string; active: boolean; lastRunAt: string | null }[] }>(section === "Scheduled" ? "/api/reporting/boardpacks" : null);
 
   const toggleFav = (id: string) => {
@@ -55,6 +60,27 @@ export default function ReportingCenterView() {
   };
 
   const shown = useMemo(() => lib.data?.templates ?? [], [lib.data]);
+
+  const saveCustomReport = async () => {
+    if (!newRptName.trim() || newComponents.length === 0) { toast.error("Name and at least one component required"); return; }
+    setBusy(true);
+    try {
+      await api.post("/api/reporting/custom", { name: newRptName.trim(), components: newComponents });
+      toast.success("Custom report created"); setNewRptName(""); setNewComponents([]); customRpts.refetch();
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Save failed"); } finally { setBusy(false); }
+  };
+  const deleteCustom = async (id: string) => {
+    try { await api.del("/api/reporting/custom?id=" + id); toast.success("Deleted"); customRpts.refetch(); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Delete failed"); }
+  };
+  const subscribe = async (templateId: string) => {
+    try { await api.post("/api/reporting/subs", { templateId }); toast.success("Subscribed"); subsData.refetch(); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Subscribe failed"); }
+  };
+  const unsubscribe = async (id: string) => {
+    try { await api.del("/api/reporting/subs?id=" + id); toast.success("Unsubscribed"); subsData.refetch(); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+  };
 
   return (
     <div className="space-y-5">
@@ -234,10 +260,47 @@ export default function ReportingCenterView() {
           </SectionCard>
         )
       )}
-      {(section === "Report Builder" || section === "Subscriptions" || section === "Administration") && (
-        <SectionCard title={section} description="Phase C — the backend model and API exist; the visual interface lands in the next build.">
-          <EmptyState title="Phase C" description={section === "Report Builder" ? "Visual drag-and-drop builder for KPI, chart, table and text components." : section === "Subscriptions" ? "Per-user report subscription management with frequency and format controls." : "Template CRUD, RAG rule config, branding and distribution management."} />
-        </SectionCard>
+            {section === "Report Builder" && (
+        <div className="space-y-4">
+          <SectionCard title="Report Builder — create custom reports" description="Add components to build your report. Each component pulls from live operational data.">
+            <div className="space-y-3 mb-4">
+              <div className="space-y-1"><Label>Report name *</Label><Input className="h-9 w-64" value={newRptName} onChange={(e) => setNewRptName(e.target.value)} placeholder="My Custom Report" /></div>
+              <div className="space-y-2">
+                {newComponents.map((c, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm rounded-md border border-slate-200 px-3 py-2">
+                    <Badge variant="outline" className="border-blue-200 text-blue-700">{c.type}</Badge>
+                    <span className="flex-1 text-slate-700">{c.title}</span>
+                    <Button variant="ghost" size="sm" onClick={() => setNewComponents(newComponents.filter((_, j) => j !== i))}>Remove</Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {["kpi", "bar", "line", "pie", "table", "text", "rag", "waterfall"].map((type) => (
+                  <Button key={type} size="sm" variant="outline" className="text-xs h-7"
+                    onClick={() => setNewComponents([...newComponents, { type, title: type.toUpperCase() + " component" }])}>
+                    + {type}
+                  </Button>
+                ))}
+              </div>
+              <Button disabled={busy || !newRptName.trim() || newComponents.length === 0} onClick={() => void saveCustomReport()}>
+                <Save className="h-4 w-4 mr-1.5" />Save custom report
+              </Button>
+            </div>
+          </SectionCard>
+          {customRpts.data && customRpts.data.customReports.length > 0 && (
+            <SectionCard title="My custom reports" description="Reports you created with the builder">
+              <div className="space-y-1.5">
+                {customRpts.data.customReports.map((c) => (
+                  <div key={c.id} className="flex items-center gap-3 rounded-md border border-slate-200 px-3 py-2 text-sm">
+                    <span className="flex-1 font-medium text-slate-700">{c.name}</span>
+                    <Badge variant="outline" className="border-slate-200 text-slate-500">{c.category}</Badge>
+                    <Button variant="ghost" size="sm" onClick={() => void deleteCustom(c.id)}><Trash2 className="h-4 w-4 text-red-400" /></Button>
+                  </div>
+                ))}
+              </div>
+            </SectionCard>
+          )}
+        </div>
       )}
     </div>
   );
