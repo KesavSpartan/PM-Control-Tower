@@ -22,6 +22,9 @@ feeds, traceable insights and one-click executive reporting packs.
 | **Intelligence** | **Executive Control Tower** (RAG + GREY honesty, exception-first feed, traceable insights, 30/60/90 outlook), **Leadership Pack** (one-click, versioned, comparable), 17 sub-reports, executive status reports, What-Changed, report schedules, analytics, AI assistant |
 | **Connect** | Integration hub, webhook subscriptions with delivery log, automation rules, AI connector gateway |
 | **Integrity** | Data freshness engine (honest staleness), evidence bundles (SHA-256 tamper-evident chains), seeded Monte Carlo P80 forecasting, say/do calibration, scenario sandbox (branch & merge), AI-drafted steering packs (human-gated), benefits realization |
+| **Investment** | Business cases with cash-flow model, ROI/NPV/IRR/payback, best/base/worst scenarios, NPV sensitivity, governance workflow (SUBMITTED -> CFO -> APPROVED/FUNDED) |
+| **Controls** | Per-project S-Curve (cost/progress/EV), planned-vs-actual, forecast completion (SPI-extrapolated, labeled) |
+| **Admin Control Center** | Metadata-driven configuration: entity/field definitions, custom field types (14 base types), naming conventions, terminology dictionary, feature flags, org settings — server-side enforced |
 | **Admin** | Users, roles (8 system roles / 32 permissions), PMO template library, full audit trail |
 | **Data exchange** | CSV/JSON export for 22 entities; governed CSV import (dry-run validation) for 13 master-data entities |
 

@@ -81,7 +81,7 @@ const doc = new Document({
     children: [
       new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "PM CONTROL TOWER", bold: true, size: 52, color: "13294A" })] }),
       new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Master Test Plan & End-to-End Test Report", size: 30, color: "1D4ED8", bold: true })] }),
-      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Version 1.6.1  ·  Date: 2026-09-13  ·  dynamiq Solutions", size: 20, color: "5D6E85" })] }),
+      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Version 1.9.1  ·  Date: 2026-09-13  ·  dynamiq Solutions", size: 20, color: "5D6E85" })] }),
       H1("1. Test Strategy"),
       P("Levels: Unit (32 engine tests, npm test) -> API integration (authenticated REST) -> UI E2E (browser, role-based) -> Regression per release. Environment: standalone build on port 3000 against db/custom.db; reseeds via start.bat plus idempotent module seeds. Test personas: PMO_ADMIN (pmo@pmct.io), PROJECT_MANAGER (pm.sarah@pmct.io), EXECUTIVE (ceo@pmct.io), TEAM_MEMBER (liam@pmct.io), AUDITOR (auditor@pmct.io) - password Pmct@2026. Golden rule: numbers must be COMPUTED (change input -> downstream moves); unauthorized calls get 401/403, never data."),
       H1("2. Execution Summary"),
@@ -119,6 +119,6 @@ const doc = new Document({
 });
 
 Packer.toBuffer(doc).then((buf) => {
-  fs.writeFileSync("../PM-Control-Tower-Test-Report.docx", buf);
+  fs.writeFileSync("../Important Documents/PM-Control-Tower-Test-Report.docx", buf);
   console.log("WROTE ../PM-Control-Tower-Test-Report.docx (" + Math.round(buf.length / 1024) + " KB)");
 });
