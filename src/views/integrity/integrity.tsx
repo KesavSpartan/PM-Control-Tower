@@ -116,7 +116,7 @@ export default function IntegrityView() {
     if (!effProjectId) return;
     setBusy(true);
     try {
-      const r = await api.post<{ scenarioId: string }>("/api/integrity/scenarios", { projectId: effProjectId, name: `What-if ${new Date().toLocaleDateString()}` });
+      const r = await api.post<{ scenarioId: string }>("/api/integrity/scenarios", { projectId: effProjectId, name: `What-if ${new Date().toLocaleDateString("en-US")}` });
       toast.success("Sandbox branched — production is untouched"); scenarios.refetch(); setDiff(null); setProjectId(effProjectId);
     } catch (e) { toast.error(e instanceof Error ? e.message : "Fork failed"); } finally { setBusy(false); }
   };
@@ -312,7 +312,7 @@ export default function IntegrityView() {
               <div className="space-y-1.5">
                 {runs.data.runs.map((r) => (
                   <div key={r.id} className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 text-sm">
-                    <span className="text-slate-600">seed {r.seed} · {r.iterations} iters · {new Date(r.createdAt).toLocaleString()}</span>
+                    <span className="text-slate-600">seed {r.seed} · {r.iterations} iters · {new Date(r.createdAt).toLocaleString("en-US")}</span>
                     {r.stale ? <Badge variant="outline" className="border-amber-200 text-amber-700">STALE — schedule changed</Badge> : <Badge variant="outline" className="border-emerald-200 text-emerald-700">CURRENT</Badge>}
                   </div>
                 ))}
@@ -407,7 +407,7 @@ export default function IntegrityView() {
         {approvalLink && (
           <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm">
             <p className="font-medium text-amber-800">Signed approval link (HMAC-SHA256, expiring) — status: CONFIGURED</p>
-            <p className="text-xs text-amber-700 break-all mt-1">{approvalLink.title} · expires {new Date(approvalLink.expiresAt).toLocaleString()}</p>
+            <p className="text-xs text-amber-700 break-all mt-1">{approvalLink.title} · expires {new Date(approvalLink.expiresAt).toLocaleString("en-US")}</p>
             <a className="text-xs text-blue-700 underline break-all" href={approvalLink.url} target="_blank" rel="noreferrer">{approvalLink.url.slice(0, 72)}…</a>
           </div>
         )}
@@ -453,7 +453,7 @@ export default function IntegrityView() {
                 ]} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#94a3b8" />
                   <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                  <ChartTooltip formatter={(val: number | string) => "$" + Number(val).toLocaleString()} />
+                  <ChartTooltip formatter={(val: number | string) => "$" + Number(val).toLocaleString("en-US")} />
                   <Bar dataKey="base" stackId="w" fill="transparent" />
                   <Bar dataKey="value" stackId="w" radius={[4, 4, 0, 0]}>
                     {benefits.data && [[0, "#1d4ed8"], [1, "#0e9f6e"], [2, "#f59e0b"]].map(([i, c]) => <BarCell key={i} fill={c as string} />)}

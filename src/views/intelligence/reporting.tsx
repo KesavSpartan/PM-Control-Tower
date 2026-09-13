@@ -188,7 +188,7 @@ export default function ReportingCenterView() {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-sm font-medium text-slate-800 flex-1">{r.templateName}</p>
                       <Badge variant="outline" className="border-slate-200 text-slate-500">{r.category}</Badge>
-                      <span className="text-xs text-slate-400">{r.period.replace(/_/g, " ").toLowerCase()} · {new Date(r.createdAt).toLocaleString()} · by {r.generatedBy}</span>
+                      <span className="text-xs text-slate-400">{r.period.replace(/_/g, " ").toLowerCase()} · {new Date(r.createdAt).toLocaleString("en-US")} · by {r.generatedBy}</span>
                       <Button size="sm" variant="outline" onClick={() => void openReport(r.id)}>Open</Button>
                       <Button size="sm" variant="ghost" onClick={() => window.open("/api/reporting/" + r.id + "?format=html", "_blank")}>Print / PDF</Button>
                     </div>
@@ -232,7 +232,7 @@ export default function ReportingCenterView() {
                   <div key={p.id} className="rounded-lg border border-slate-200 p-3">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium text-slate-800 flex-1">{p.name}</p>
-                      <span className="text-xs text-slate-400">{p.pages.length} pages · {new Date(p.createdAt).toLocaleDateString()}</span>
+                      <span className="text-xs text-slate-400">{p.pages.length} pages · {new Date(p.createdAt).toLocaleDateString("en-US")}</span>
                     </div>
                     <p className="text-xs text-slate-400 mt-1">{p.pages.map((pg) => pg.title).join(" → ")}</p>
                   </div>

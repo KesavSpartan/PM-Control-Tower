@@ -113,7 +113,7 @@ export default function TechnologyView() {
                   <Rocket className="h-4 w-4 text-slate-400 shrink-0" />
                   <span className="flex-1 truncate text-slate-700">{r.version}</span>
                   <StatusChip status={r.status} />
-                  <span className="text-xs tabular-nums text-slate-400">{new Date(r.releasedAt).toLocaleDateString()} · lead {num(r.leadTimeDays)}d</span>
+                  <span className="text-xs tabular-nums text-slate-400">{new Date(r.releasedAt).toLocaleDateString("en-US")} · lead {num(r.leadTimeDays)}d</span>
                 </div>
               ))}
             </div>
