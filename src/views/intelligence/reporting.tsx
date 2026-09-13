@@ -239,7 +239,6 @@ export default function ReportingCenterView() {
           <EmptyState title="Phase C" description={section === "Report Builder" ? "Visual drag-and-drop builder for KPI, chart, table and text components." : section === "Subscriptions" ? "Per-user report subscription management with frequency and format controls." : "Template CRUD, RAG rule config, branding and distribution management."} />
         </SectionCard>
       )}
-      )}
     </div>
   );
 }
