@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 import { withApi, ok, ApiError, parseBody } from "@/lib/api";
 import { writeAudit } from "@/lib/audit";
 import { emitRealtime, projectRoom } from "@/lib/realtime";
-import { PROJECT_STATUS, PRIORITY } from "@/lib/constants";
+import {  PROJECT_STATUS, PRIORITY  } from "@/lib/constants";
 
 const projectCreateSchema = z.object({
   code: z.string().trim().min(2).max(32),
@@ -80,7 +80,17 @@ export const GET = withApi(async (ctx) => {
 }, { permission: "project.view", rateLimit: { limit: 300, windowMs: 60_000 } });
 
 export const POST = withApi(async (ctx) => {
-  const body = await parseBody(ctx.req, projectCreateSchema);
+  const body = await parseBody(ctx.req, projectCreateSchema.extend({ customFields: z.record(z.string(), z.unknown()).optional() }));
+
+  // Metadata-driven custom fields: backend enforcement of published FieldDefinitions
+  let customFieldsJson: string | null = null;
+  {
+    const { validateFieldValues } = await import("@/lib/engines/metadata");
+    const defs = await db.fieldDefinition.findMany({ where: { entityKey: "project", status: "PUBLISHED" } });
+    const res = validateFieldValues(defs.map((d) => ({ internalName: d.internalName, displayLabel: d.displayLabel, baseType: d.baseType, required: d.required, optionsJson: d.optionsJson })), body.customFields ?? {});
+    if (!res.ok) throw new ApiError(400, res.errors.map((e) => e.message).join("; "));
+    customFieldsJson = JSON.stringify(res.normalized);
+  }
   const code = body.code.toUpperCase();
   const exists = await db.project.findUnique({ where: { code }, select: { id: true } });
   if (exists) throw new ApiError(409, `Project code ${code} already exists`);
@@ -104,6 +114,7 @@ export const POST = withApi(async (ctx) => {
 
   const project = await db.project.create({
     data: {
+      customFieldsJson,
       code,
       name: body.name,
       description: body.description ?? null,

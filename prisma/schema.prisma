@@ -200,6 +200,7 @@ model Project {
   scenarios        Scenario[]
   aiActions        AiAction[]
   benefitProfiles  BenefitProfile[]
+  customFieldsJson String?
   projectScore     ProjectScore?
 }
 
