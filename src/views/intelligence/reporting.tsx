@@ -35,6 +35,8 @@ export default function ReportingCenterView() {
   const query = `/api/reporting?${q ? `q=${encodeURIComponent(q)}&` : ""}${cat ? `category=${cat}&` : ""}`;
   const lib = useApi<LibraryData>(section === "Library" ? query : null);
   const history = useApi<{ reports: GenReport[] }>(section === "History" || section === "My Reports" ? "/api/reporting?history=1" : null);
+  const packData = useApi<{ packs: { id: string; name: string; createdAt: string; pages: { title: string }[] }[] }>(section === "Board Packs" ? "/api/reporting/boardpacks" : null);
+  const schedData = useApi<{ schedules: { id: string; templateId: string; frequency: string; active: boolean; lastRunAt: string | null }[] }>(section === "Scheduled" ? "/api/reporting/boardpacks" : null);
 
   const toggleFav = (id: string) => {
     const next = favs.includes(id) ? favs.filter((f) => f !== id) : [...favs, id];
@@ -192,17 +194,51 @@ export default function ReportingCenterView() {
       )}
 
       {/* OTHER SECTIONS — honest status */}
-      {["Report Builder", "Board Packs", "Scheduled", "Subscriptions", "Administration"].includes(section) && (
-        <SectionCard title={section} description="Phase B/C of the Reporting Center roadmap">
-          <EmptyState
-            title={`${section} — scheduled for the next build phase`}
-            description={section === "Report Builder"
-              ? "Visual drag-and-drop builder (KPI, chart, table, text components) — Phase C. The template API it will render against is live."
-              : section === "Board Packs"
-                ? "Multi-report board pack composer with cover, commentary and export — Phase C. The Leadership Pack in Reports provides the interim workflow."
-                : "Distribution, subscriptions UI and template administration land with the builder phase; the subscription model + API already exist."}
-          />
+      {section === "Board Packs" && (
+        !packData.data ? <LoadingBlock /> : (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <StatCard label="Packs" value={packData.data.packs.length} />
+            </div>
+            {packData.data.packs.length === 0 ? <EmptyState title="No board packs yet" description="Generate reports first, then combine them into a pack." /> : (
+              <div className="space-y-2">
+                {packData.data.packs.map((p) => (
+                  <div key={p.id} className="rounded-lg border border-slate-200 p-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-slate-800 flex-1">{p.name}</p>
+                      <span className="text-xs text-slate-400">{p.pages.length} pages · {new Date(p.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1">{p.pages.map((pg) => pg.title).join(" → ")}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      )}
+      {section === "Scheduled" && (
+        !schedData.data ? <LoadingBlock /> : (
+          <SectionCard title="Scheduled reports" description="Recurring report generation and delivery">
+            {schedData.data.schedules.length === 0 ? <EmptyState title="No scheduled reports" /> : (
+              <div className="space-y-1.5">
+                {schedData.data.schedules.map((s) => (
+                  <div key={s.id} className="flex items-center gap-3 rounded-md border border-slate-200 px-3 py-2 text-sm">
+                    <Clock className="h-4 w-4 text-blue-500" />
+                    <span className="flex-1 font-medium text-slate-700">{s.templateId.slice(0,8)}…</span>
+                    <Badge variant="outline" className="border-slate-200 text-slate-500">{s.frequency}</Badge>
+                    <StatusChip status={s.active ? "ACTIVE" : "PAUSED"} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </SectionCard>
+        )
+      )}
+      {(section === "Report Builder" || section === "Subscriptions" || section === "Administration") && (
+        <SectionCard title={section} description="Phase C — the backend model and API exist; the visual interface lands in the next build.">
+          <EmptyState title="Phase C" description={section === "Report Builder" ? "Visual drag-and-drop builder for KPI, chart, table and text components." : section === "Subscriptions" ? "Per-user report subscription management with frequency and format controls." : "Template CRUD, RAG rule config, branding and distribution management."} />
         </SectionCard>
+      )}
       )}
     </div>
   );

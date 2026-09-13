@@ -1866,3 +1866,33 @@ model StrategicObjective {
   projects    Project[]
   @@index([order])
 }
+
+model BoardPack {
+  id                String   @id @default(cuid())
+  name              String
+  createdBy         String
+  executiveSummary  String?
+  confidentiality   String   @default("CONFIDENTIAL")
+  createdAt         DateTime @default(now())
+  pages             BoardPackPage[]
+  @@index([createdAt])
+}
+model BoardPackPage {
+  id        String   @id @default(cuid())
+  packId    String
+  order     Int
+  title     String
+  reportId  String?
+  pack      BoardPack @relation(fields: [packId], references: [id], onDelete: Cascade)
+  @@index([packId])
+}
+model CustomReport {
+  id          String   @id @default(cuid())
+  name        String
+  category    String   @default("CUSTOM")
+  componentsJson String @default("[]")
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([createdBy])
+}
