@@ -205,6 +205,8 @@ model Project {
   aiActions        AiAction[]
   benefitProfiles  BenefitProfile[]
   customFieldsJson String?
+  strategicObjectiveId String?
+  strategicObjective StrategicObjective? @relation(fields: [strategicObjectiveId], references: [id], onDelete: SetNull)
   projectScore     ProjectScore?
   uatCycles        UatCycle[]
   scheduleScenarios ScheduleScenario[]
@@ -1852,4 +1854,15 @@ model ScheduleScenario {
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   @@index([projectId])
+}
+
+model StrategicObjective {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  weight      Float    @default(20)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  projects    Project[]
+  @@index([order])
 }
