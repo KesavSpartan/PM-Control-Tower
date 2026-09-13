@@ -36,12 +36,12 @@ export default function ReportingCenterView() {
   });
 
   const query = `/api/reporting?${q ? `q=${encodeURIComponent(q)}&` : ""}${cat ? `category=${cat}&` : ""}`;
-  const lib = useApi<LibraryData>(section === "Library" ? query : null);
+  const lib = useApi<LibraryData>(query);
   const history = useApi<{ reports: GenReport[] }>(section === "History" || section === "My Reports" ? "/api/reporting?history=1" : null);
-  const packData = useApi<{ packs: { id: string; name: string; createdAt: string; pages: { title: string }[] }[] }>(section === "Board Packs" ? "/api/reporting/boardpacks" : null);
-  const customRpts = useApi<{ customReports: { id: string; name: string; category: string; componentsJson: string }[] }>(section === "Report Builder" || section === "Administration" ? "/api/reporting/custom" : null);
-  const subsData = useApi<{ subscriptions: { id: string; templateId: string; frequency: string; format: string }[]; templates: { id: string; name: string; category: string }[] }>(section === "Subscriptions" ? "/api/reporting/subs" : null);
-  const schedData = useApi<{ schedules: { id: string; templateId: string; frequency: string; active: boolean; lastRunAt: string | null }[] }>(section === "Scheduled" ? "/api/reporting/boardpacks" : null);
+  const packData = useApi<{ packs: { id: string; name: string; createdAt: string; pages: { title: string }[] }[] }>("/api/reporting/boardpacks");
+  const customRpts = useApi<{ customReports: { id: string; name: string; category: string; componentsJson: string }[] }>("/api/reporting/custom");
+  const subsData = useApi<{ subscriptions: { id: string; templateId: string; frequency: string; format: string }[]; templates: { id: string; name: string; category: string }[] }>("/api/reporting/subs");
+  const schedData = useApi<{ schedules: { id: string; templateId: string; frequency: string; active: boolean; lastRunAt: string | null }[] }>("/api/reporting/boardpacks");
 
   const toggleFav = (id: string) => {
     const next = favs.includes(id) ? favs.filter((f) => f !== id) : [...favs, id];
