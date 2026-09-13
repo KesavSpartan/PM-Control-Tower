@@ -12,13 +12,13 @@ import { CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, C
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import {
+import { Server, 
   Gauge, Layers, GitBranch, FolderKanban, ClipboardList, ListTree, CalendarRange, GanttChartSquare,
   Milestone, Layers3, Users, Clock, Inbox, CalendarCheck2, Wallet, TrendingUp, HeartPulse, ShieldAlert,
   ArrowLeftRight, ScanSearch, Landmark, BarChart3, LineChart, Sparkles, Plug, Blocks, Workflow, Bell,
   Webhook, BrainCircuit, UserCog, KeyRound, LayoutTemplate, ScrollText, Settings, Search, Plus, Menu,
   Radio, LogOut, CircleUser, TowerControl, Crown,
-} from "lucide-react";
+  ShieldCheck, Target, BookOpen } from "lucide-react";
 
 export interface SessionUser {
   id: string; email: string; name: string; isSuperAdmin: boolean;
@@ -59,18 +59,23 @@ const NAV: NavGroup[] = [
   {
     label: "Control", items: [
       { label: "Financials", href: "/financials", icon: Wallet, perm: "financial.view" },
+      { label: "Investment & Business Case", href: "/investment", icon: TrendingUp, perm: "financial.view" },
       { label: "EVM", href: "/evm", icon: TrendingUp, perm: "evm.view" },
       { label: "Health", href: "/health", icon: HeartPulse, perm: "evm.view" },
       { label: "RAID", href: "/raid", icon: ShieldAlert, perm: "project.view" },
       { label: "Change Control", href: "/changes", icon: ArrowLeftRight, perm: "project.view" },
       { label: "Stage Gates", href: "/gates", icon: ScanSearch, perm: "project.view" },
       { label: "Governance", href: "/governance", icon: Landmark, perm: "project.view" },
+      { label: "Data Integrity", href: "/integrity", icon: ShieldCheck, perm: "integrity.view" },
+      { label: "CTO Tower", href: "/technology", icon: Server, perm: "integration.view" },
+      { label: "Prioritization", href: "/prioritization", icon: Target, perm: "portfolio.view" },
     ],
   },
   {
     label: "Intelligence", items: [
       { label: "Leadership Control Tower", href: "/reports/leadership", icon: Crown, perm: "reports.view" },
       { label: "Reports", href: "/reports", icon: BarChart3, perm: "reports.view" },
+      { label: "Reporting Center", href: "/reporting", icon: BookOpen, perm: "reports.view" },
       { label: "Analytics", href: "/analytics", icon: LineChart, perm: "reports.view" },
       { label: "AI PM Assistant", href: "/assistant", icon: Sparkles, perm: "ai.use" },
     ],

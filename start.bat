@@ -63,6 +63,11 @@ if "%RUNNER%"=="bun" (
 ) else (
     call npx tsx scripts/seed.ts
     call npx tsx scripts/seed-leadership.ts
+    call npx tsx scripts/seed-integrity.ts
+    call npx tsx scripts/seed-technology.ts
+    call npx tsx scripts/seed-connectors.ts
+    call npx tsx scripts/seed-connectors2.ts
+    call npx tsx scripts/seed-reporting.ts
 )
 
 goto :launch
@@ -77,6 +82,11 @@ if "%RUNNER%"=="bun" (
 ) else (
     call npx tsx scripts/seed.ts
     call npx tsx scripts/seed-leadership.ts
+    call npx tsx scripts/seed-integrity.ts
+    call npx tsx scripts/seed-technology.ts
+    call npx tsx scripts/seed-connectors.ts
+    call npx tsx scripts/seed-connectors2.ts
+    call npx tsx scripts/seed-reporting.ts
 )
 echo Done.
 goto :eof
@@ -95,6 +105,11 @@ if "%RUNNER%"=="bun" (
     call npx prisma db push --accept-data-loss
     call npx tsx scripts/seed.ts
     call npx tsx scripts/seed-leadership.ts
+    call npx tsx scripts/seed-integrity.ts
+    call npx tsx scripts/seed-technology.ts
+    call npx tsx scripts/seed-connectors.ts
+    call npx tsx scripts/seed-connectors2.ts
+    call npx tsx scripts/seed-reporting.ts
 )
 echo Database reset and seeded.
 goto :eof
