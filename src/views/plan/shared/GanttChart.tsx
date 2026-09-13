@@ -19,7 +19,7 @@ const WEEKEND_COLOR = "#f1f5f9";
 
 interface GanttTask { id: string; code: string; name: string; status: string; durationDays: number; progress: number; isCritical: boolean; isSummary: boolean; totalFloat: number; earliestStart: string | null; earliestFinish: string | null; latestStart: string | null; latestFinish: string | null; startDate: string | null; endDate: string | null; wbs?: { id: string; code: string; name: string } | null }
 interface GanttDep { predecessorId: string; successorId: string; depType: string; lagDays: number }
-interface GanttData { tasks: GanttTask[]; deps: GanttDep[]; criticalCount: number; summary: { totalTasks: number; criticalTasks: { id: string }[]; projectFinish: string | null; avgProgress: number } }
+interface GanttData { tasks: GanttTask[]; dependencies: GanttDep[]; summary: { taskCount: number; leafTaskCount: number; dependencyCount: number; criticalCount: number; projectStart: string | null; projectFinish: string | null } }
 type Zoom = "day" | "week" | "month";
 
 export default function GanttChart({ projectId }: { projectId: string }) {
@@ -65,14 +65,14 @@ export default function GanttChart({ projectId }: { projectId: string }) {
     let row = 0;
     for (const g of groups) { if (collapsed.has(g.key)) continue; for (const t of g.tasks) { geoms.set(t.id, { x1: toX(t.earliestStart), y: row * 40 + 20, x2: toX(t.earliestFinish) }); row++; } }
     const paths: { d: string; c: boolean }[] = [];
-    for (const dep of d.deps) {
+    for (const dep of d.dependencies) {
       const f = geoms.get(dep.predecessorId), to = geoms.get(dep.successorId);
       if (!f || !to) continue;
       const isCrit = d.tasks.find((t) => t.id === dep.successorId)?.isCritical ?? false;
       paths.push({ d: `M ${f.x2} ${f.y} L ${f.x2 + 8} ${f.y} L ${f.x2 + 8} ${to.y} L ${to.x1 - 4} ${to.y}`, c: isCrit });
     }
     return paths;
-  }, [groups, collapsed, showDeps, d.deps, toX]);
+  }, [groups, collapsed, showDeps, d.dependencies, toX]);
 
   const barH = 18, rowH = 40;
 
@@ -80,10 +80,10 @@ export default function GanttChart({ projectId }: { projectId: string }) {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-3">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 flex-1">
-          <div className="rounded-md border border-slate-200 px-3 py-1.5"><p className="text-[10px] uppercase text-slate-400">Tasks</p><p className="text-sm font-semibold">{d.summary.totalTasks}</p></div>
-          <div className="rounded-md border border-red-200 px-3 py-1.5 bg-red-50"><p className="text-[10px] uppercase text-red-400">Critical path</p><p className="text-sm font-semibold text-red-700">{d.criticalCount} tasks</p></div>
+          <div className="rounded-md border border-slate-200 px-3 py-1.5"><p className="text-[10px] uppercase text-slate-400">Tasks</p><p className="text-sm font-semibold">{d.summary.taskCount}</p></div>
+          <div className="rounded-md border border-red-200 px-3 py-1.5 bg-red-50"><p className="text-[10px] uppercase text-red-400">Critical path</p><p className="text-sm font-semibold text-red-700">{d.summary.criticalCount} tasks</p></div>
           <div className="rounded-md border border-slate-200 px-3 py-1.5"><p className="text-[10px] uppercase text-slate-400">Duration</p><p className="text-sm font-semibold">{totalDays}d</p></div>
-          <div className="rounded-md border border-slate-200 px-3 py-1.5"><p className="text-[10px] uppercase text-slate-400">Avg progress</p><p className="text-sm font-semibold">{Math.round(d.summary.avgProgress)}%</p></div>
+          <div className="rounded-md border border-slate-200 px-3 py-1.5"><p className="text-[10px] uppercase text-slate-400">Avg progress</p><p className="text-sm font-semibold">{Math.round(d.tasks.filter((t: GanttTask) => !t.isSummary).length > 0 ? Math.round(d.tasks.filter((t: GanttTask) => !t.isSummary).reduce((s: number, t: GanttTask) => s + (t.progress || 0), 0) / d.tasks.filter((t: GanttTask) => !t.isSummary).length) : 0)}%</p></div>
         </div>
         <div className="flex items-center gap-1.5">
           <button onClick={() => setShowCritical(!showCritical)} className={cn("px-2 py-1 rounded text-xs font-medium border", showCritical ? "bg-red-50 text-red-700 border-red-200" : "bg-white text-slate-400 border-slate-200")}>Critical</button>
