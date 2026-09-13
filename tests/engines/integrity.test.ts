@@ -357,3 +357,50 @@ test("finance: NPV sensitivity monotonic in benefits", () => {
   const s = npvSensitivity(bc);
   for (let i = 1; i < s.length; i++) assert.ok(s[i].npv > s[i - 1].npv);
 });
+
+// ---------- v1.9.0 METADATA ENGINE ----------
+import { applyNameStyle, deriveInternalName, expandNumbering, validateFieldValues, evaluateFormula } from "../../src/lib/engines/metadata";
+
+test("metadata: name styles", () => {
+  assert.equal(applyNameStyle("Business Criticality", "snake_case"), "business_criticality");
+  assert.equal(applyNameStyle("Business Criticality", "UPPER_SNAKE"), "BUSINESS_CRITICALITY");
+  assert.equal(applyNameStyle("Business Criticality", "PascalCase"), "BusinessCriticality");
+  assert.equal(applyNameStyle("Business Criticality", "camelCase"), "businessCriticality");
+});
+test("metadata: prefix/suffix naming convention", () => {
+  assert.equal(deriveInternalName("Business Criticality", { style: "PascalCase", prefix: "PMO_", suffix: "_FIELD" }), "PMO_BusinessCriticality_FIELD");
+});
+test("metadata: numbering tokens", () => {
+  assert.equal(expandNumbering("{PREFIX}-{YEAR}-{SEQ}", { prefix: "ENG", year: 2026, seq: 42 }), "ENG-2026-00042");
+  assert.equal(expandNumbering("RSK-{YEAR}-{SEQ}", { year: 2026, seq: 7, pad: 3 }), "RSK-2026-007");
+});
+test("metadata: field validation required + select options", () => {
+  const defs = [
+    { internalName: "business_criticality", displayLabel: "Business Criticality", baseType: "SELECT", required: true, optionsJson: JSON.stringify(["Low", "High"]) },
+    { internalName: "notes", displayLabel: "Notes", baseType: "TEXT", required: false, optionsJson: null },
+  ];
+  const bad = validateFieldValues(defs, { business_criticality: "Extreme" });
+  assert.equal(bad.ok, false);
+  const good = validateFieldValues(defs, { business_criticality: "High", notes: "ok" });
+  assert.equal(good.ok, true);
+  assert.equal(good.normalized.notes, "ok");
+});
+test("metadata: number/date/boolean validation", () => {
+  const defs = [
+    { internalName: "budget", displayLabel: "Budget", baseType: "CURRENCY", required: true, optionsJson: null },
+    { internalName: "go_live", displayLabel: "Go live", baseType: "DATE", required: false, optionsJson: null },
+  ];
+  const bad = validateFieldValues(defs, { budget: "abc", go_live: "not-a-date" });
+  assert.equal(bad.ok, false);
+  assert.equal(bad.errors.length, 2);
+  const good = validateFieldValues(defs, { budget: "5000000", go_live: "2026-12-01" });
+  assert.equal(good.ok, true);
+  assert.equal(good.normalized.budget, 5000000);
+});
+test("metadata: safe formula evaluation (no eval abuse)", () => {
+  const r = evaluateFormula("({forecast} - {budget}) / {budget} * 100", { forecast: 1200000, budget: 1000000 });
+  assert.equal(r.ok, true);
+  assert.equal(r.value, 20);
+  const bad = evaluateFormula("process.exit(1)", {});
+  assert.equal(bad.ok, false);
+});

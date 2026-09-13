@@ -41,6 +41,7 @@ const TechnologyView = L(() => import("@/views/technology/technology"));
 const PrioritizationView = L(() => import("@/views/portfolio/prioritization"));
 const ReportingCenterView = L(() => import("@/views/intelligence/reporting"));
 const InvestmentView = L(() => import("@/views/control/investment"));
+const AdminView = L(() => import("@/views/admin/admin"));
 
 // --- Intelligence, Connect & Admin views (batch F-C) ---
 const ReportsView = L(() => import("@/views/intelligence/reports"));
@@ -94,6 +95,7 @@ export function renderView(segments: string[]): { C: ComponentType; key: string 
     case "prioritization": return { C: PrioritizationView, key };
     case "reporting": return { C: ReportingCenterView, key };
     case "investment": return { C: InvestmentView, key };
+    case "admin-center": return { C: AdminView, key };
     case "reports":
       switch (b) {
         case "leadership": return { C: LeadershipView, key };

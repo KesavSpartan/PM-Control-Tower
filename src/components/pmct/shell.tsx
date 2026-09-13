@@ -96,6 +96,7 @@ const NAV: NavGroup[] = [
       { label: "Roles & Permissions", href: "/admin/roles", icon: KeyRound, perm: "admin.users" },
       { label: "PMO Template Library", href: "/admin/templates", icon: LayoutTemplate, perm: "admin.templates" },
       { label: "Audit Trail", href: "/admin/audit", icon: ScrollText, perm: "admin.audit" },
+      { label: "Control Center", href: "/admin-center", icon: ShieldCheck, perm: "admin.config" },
       { label: "Configuration", href: "/admin/settings", icon: Settings, perm: "admin.config" },
     ],
   },

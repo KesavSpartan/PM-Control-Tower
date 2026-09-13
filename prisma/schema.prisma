@@ -1694,3 +1694,86 @@ model BusinessCase {
 
   @@index([status])
 }
+
+// ============ ADMIN CONTROL CENTER — METADATA LAYER (v1.9.0) ============
+
+model EntityDefinition {
+  id           String   @id @default(cuid())
+  entityKey    String   @unique // stable internal name: project, risk...
+  displayName  String
+  pluralName   String
+  description  String?
+  active       Boolean  @default(true)
+  updatedAt    DateTime @updatedAt
+}
+
+model CustomFieldType {
+  id           String  @id @default(cuid())
+  name         String  @unique // reusable type name: Business Criticality
+  baseType     String // TEXT | LONG_TEXT | NUMBER | CURRENCY | PERCENT | DATE | BOOLEAN | SELECT | MULTI_SELECT | RAG | SCORE | RATING | USER | FORMULA
+  optionsJson  String? // select options, score range, formula expression
+  display      String  @default("INPUT") // INPUT | BADGE | RAG | GAUGE | STARS
+  required     Boolean @default(false)
+  reusable     Boolean @default(true)
+  createdBy    String?
+  createdAt    DateTime @default(now())
+}
+
+model FieldDefinition {
+  id           String  @id @default(cuid())
+  entityKey    String
+  internalName String // stable machine name
+  displayLabel String
+  customTypeId String?
+  optionsJson  String?
+  baseType     String  @default("TEXT")
+  required     Boolean @default(false)
+  defaultValue String?
+  helpText     String?
+  searchable   Boolean @default(true)
+  filterable   Boolean @default(true)
+  reportable   Boolean @default(true)
+  sensitive    Boolean @default(false)
+  displayOrder Int     @default(100)
+  status       String  @default("PUBLISHED") // DRAFT | PUBLISHED | ARCHIVED
+  createdBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([entityKey, internalName])
+  @@index([entityKey, status])
+}
+
+model NamingConvention {
+  id        String @id @default(cuid())
+  scope     String @unique // fields | entities | projectCode | riskCode | issueCode | changeCode
+  style     String @default("snake_case") // snake_case | camelCase | PascalCase | UPPER_SNAKE
+  prefix    String @default("")
+  suffix    String @default("")
+  includeYear Boolean @default(false)
+  seqPad    Int    @default(5)
+}
+
+model Terminology {
+  id          String  @id @default(cuid())
+  termKey     String  @unique // project, risk, milestone...
+  defaultTerm String
+  customTerm  String?
+  pluralName  String?
+  active      Boolean @default(true)
+}
+
+model FeatureFlag {
+  id      String  @id @default(cuid())
+  key     String  @unique
+  enabled Boolean @default(false)
+  roles   String? // csv of role codes; empty = all
+}
+
+model AdminSettings {
+  id                   String @id @default("singleton")
+  orgName              String @default("dynamiq Solutions")
+  confidentialityLabel String @default("CONFIDENTIAL — INTERNAL MANAGEMENT USE ONLY")
+  currency             String @default("USD")
+  dateFormat           String @default("YYYY-MM-DD")
+}
