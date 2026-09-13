@@ -206,6 +206,8 @@ model Project {
   benefitProfiles  BenefitProfile[]
   customFieldsJson String?
   projectScore     ProjectScore?
+  uatCycles        UatCycle[]
+  scheduleScenarios ScheduleScenario[]
 }
 
 // ============ PLANNING: SCOPE → WBS → TASKS ============
@@ -1808,4 +1810,46 @@ model ScimToken {
   active     Boolean  @default(true)
   lastUsedAt DateTime?
   createdAt  DateTime @default(now())
+}
+
+// ============ DELIVERY DEPTH: UAT + DOCUMENTS + SCHEDULE SCENARIOS (v2.2.0) ============
+
+model UatCycle {
+  id          String   @id @default(cuid())
+  projectId   String
+  name        String
+  status      String   @default("ACTIVE") // ACTIVE | CLOSED
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  cases       UatCase[]
+  @@index([projectId])
+}
+
+model UatCase {
+  id          String  @id @default(cuid())
+  cycleId     String
+  title       String
+  severity    String  @default("MEDIUM") // LOW | MEDIUM | HIGH | CRITICAL
+  status      String  @default("NOT_RUN") // NOT_RUN | PASS | FAIL | BLOCKED
+  executedBy  String?
+  executedAt  DateTime?
+  defectRef   String?
+  notes       String?
+  cycle       UatCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  @@index([cycleId])
+}
+
+
+model ScheduleScenario {
+  id            String   @id @default(cuid())
+  projectId     String
+  name          String
+  deltasJson    String   // {taskId: newDurationDays}
+  baseFinish    Float
+  scenarioFinish Float
+  createdAt     DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  @@index([projectId])
 }
