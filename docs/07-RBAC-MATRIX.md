@@ -6,7 +6,7 @@ and actions a role cannot use. Users may hold multiple roles; grants union.
 `PMO_ADMIN` carries the `*` wildcard; `User.isSuperAdmin` bypasses all checks
 (break-glass, use sparingly).
 
-## Permission catalog (32)
+## Permission catalog (43)
 
 | Code | Category | Description |
 |---|---|---|
@@ -42,6 +42,17 @@ and actions a role cannot use. Users may hold multiple roles; grants union.
 | `admin.templates` | ADMIN | Manage PMO template library |
 | `admin.audit` | ADMIN | View audit trail |
 | `admin.config` | ADMIN | System configuration |
+| `agile.manage` | EXECUTE | Manage sprints, epics, backlog and story points |
+| `client.manage` | CONTROL | Manage clients, invoices and expenses |
+| `field.manage` | CONTROL | Manage RFIs, daily logs and punch lists |
+| `product.manage` | STRATEGY | Manage feedback portal and roadmap |
+| `docs.use` | KNOWLEDGE | Create and edit workspace docs |
+| `boards.use` | KNOWLEDGE | Use project message boards |
+| `proofing.manage` | DELIVERY | Manage deliverable proofing rounds and approvals |
+
+*(v3.0 rows at the bottom; a further `integrity.*`/`scenario.manage`/`benefits.manage`
+trio from earlier releases completes the live catalog — always re-check
+`src/lib/rbac.ts` as the source of truth.)*
 
 ## Role matrix
 
@@ -77,8 +88,15 @@ and actions a role cannot use. Users may hold multiple roles; grants union.
 | ai.use | ✓ | ✓ | ✓ | ✓ | ✓ | | | |
 | admin.users | | ✓ | | | | | | |
 | admin.templates | | ✓ | | | | | | |
-| admin.audit | | ✓ | | | | | ✓ | |
+| admin.audit | | ✓ | | | | ✓ | | |
 | admin.config | | ✓ | | | | | | |
+| agile.manage | | ✓ | | ✓ | ✓ | | | |
+| client.manage | | ✓ | | | | ✓ | | |
+| field.manage | | ✓ | | ✓ | ✓ | | | |
+| product.manage | ✓ | ✓ | ✓ | | | | | |
+| docs.use | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | | ✓ |
+| boards.use | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | | ✓ |
+| proofing.manage | | ✓ | | ✓ | ✓ | | | |
 
 *(EXEC = Executive, PMO = PMO Administrator `*`, PfM = Portfolio Manager,
 PgmM = Program Manager, PM = Project Manager, FIN = Finance Controller,
@@ -86,12 +104,29 @@ AUD = Auditor, TEAM = Team Member.)*
 
 ## Behavioral consequences (examples)
 
-- **Executive**: sees the Control Tower and every roll-up; can decide gates; cannot
-  edit projects — the tower's "Leadership Actions" is the sanctioned write path.
+- **Executive**: sees the Control Tower and every roll-up; can decide gates; owns the
+  product roadmap & feedback triage; cannot edit projects — the tower's "Leadership
+  Actions" is the sanctioned write path.
 - **Auditor**: read-only across delivery data **plus** the full audit trail.
-- **Team Member**: project view, own timesheets, inbox — leadership bundle returns
-  `403` (verified).
-- **Program/Project Manager**: full planning + RAID + timesheet approvals, but no
-  governance-rule or user administration.
+- **Team Member**: project view, own timesheets, inbox, docs & message boards; can
+  move Kanban cards and vote on feedback (server-verified), but leadership bundle
+  and all manage permissions return `403` (verified).
+- **Program/Project Manager**: full planning + RAID + timesheet approvals + agile
+  sprints + field ops + proofing, but no governance-rule, client-billing or user
+  administration (billing belongs to Finance).
+- **Finance Controller**: budget control plus the commercial register — clients,
+  invoices, expenses (`client.manage`).
 - A session's exact grants are always visible via `GET /api/auth/me`
   (`roles` + `permissions` arrays).
+
+## Live-DB sync
+
+Permissions and grants are provisioned at seed time; for an **existing** install
+updated to v3.0, run:
+
+```bash
+npm run sync:rbac
+```
+
+It upserts the catalog (43 permissions) and every role's grants into the database
+without touching other data, and prunes codes removed from the catalog.

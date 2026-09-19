@@ -105,3 +105,45 @@
 - Browser cache after rebuilds: always hard-refresh or bump `?v=` (stale chunks 404).
 - FreshnessRail is boundary-isolated; console may log suppressed errors — check before treating as page failure.
 - Transient `data=null` in useApi: guards added on Data Integrity; apply the same `!data` guard pattern to any new tab added to other views.
+
+---
+
+## 5. v3.0 Command Center test round (executed 2026-09-19)
+
+All new-module cases executed against the live dev server (:3111) after `prisma db push`,
+`sync:rbac` and `seed:command-center`. Result: **PASS** unless noted.
+
+### API integration (authenticated)
+| ID | Steps | Expected | Result |
+|---|---|---|---|
+| TC-CC-01 | GET all 13 new endpoints (agile, clients, invoices, expenses, rfis, daily-logs, punch-list, feedback, roadmap, docs, message-boards, proofing, capacity) | 200 `success:true` each | ✅ 13/13 |
+| TC-CC-02 | PATCH /api/agile `{taskId, status:"IN_PROGRESS"}` | 200; status updated; sprint points recomputed | ✅ |
+| TC-CC-03 | POST /api/feedback/[id]/vote (toggle twice) | votesCount +1 then back; unique per user | ✅ |
+| TC-CC-04 | POST /api/message-boards/[id] reply | 201; replyCount and lastActivityAt update | ✅ |
+| TC-CC-05 | PATCH /api/invoices/[id] `{status:"PAID"}` on SENT invoice | 200; status PAID; paidAt stamped; further status change → 400 (locked) | ✅ |
+| TC-CC-06 | PATCH /api/rfis/[id] answer | status ANSWERED; dateAnswered stamped | ✅ |
+| TC-CC-07 | PATCH /api/proofing/[id] `{status:"APPROVED"}` then annotation resolve | decisionAt stamped; annotation resolved | ✅ |
+| TC-CC-08 | POST sprint → DELETE sprint with tasks | 201 → 200; tasks returned to backlog (sprintId null) | ✅ |
+| TC-CC-09 | POST /api/invoices as TEAM_MEMBER (liam) | 403 | ✅ |
+| TC-CC-10 | POST /api/rfis as TEAM_MEMBER | 403 | ✅ |
+| TC-CC-11 | PATCH /api/feedback as TEAM_MEMBER (triage) | 403 | ✅ |
+| TC-CC-12 | PATCH /api/agile card move as TEAM_MEMBER (nonexistent task) | 404 (permission passes — members may move cards) | ✅ |
+| TC-CC-13 | POST /api/agile second ACTIVE sprint same project | 400 "Only one active sprint per project" | ✅ |
+
+### UI E2E (browser, PMO login)
+| ID | Steps | Expected | Result |
+|---|---|---|---|
+| TC-CC-20 | Open #/boards — Kanban tab | Columns per TASK_STATUS with seeded cards, counts, stat cards; drag lanes present | ✅ (screenshot t1) |
+| TC-CC-21 | Boards — Calendar tab | Month grid, today marker, task/meeting chips | ✅ (t2) |
+| TC-CC-22 | Boards — Workload tab | Resource × week heatmap, red over-allocation, avg column, weeks selector | ✅ (t3) |
+| TC-CC-23 | #/agile — New sprint dialog | Fields (name/goal/dates) render; create succeeds | ✅ (t4) |
+| TC-CC-24 | #/clients — tabs | Client register with revenue roll-ups; invoice totals in stat row | ✅ (t5) |
+| TC-CC-25 | #/field — tabs | RFI aging (red >7d), impact totals, Answer action; logs; punch chain | ✅ (t6) |
+| TC-CC-26 | #/feedback | Vote cards with counts, triage chips, roadmap lanes | ✅ (t7) |
+| TC-CC-27 | #/docs | Page index with seeded docs, spaces filter, editor opens | ✅ (t8) |
+| TC-CC-28 | #/boards-hub — open thread | Thread detail with comments, reply box, pin toggle | ✅ (t9) |
+| TC-CC-29 | #/proofing | Round list + detail drawer, approve/changes actions | ✅ (t10) |
+| TC-CC-30 | Project picker present on agile/proofing/field headers | Picker renders and persists shared selection | ✅ (t11) |
+
+Known watch-item: the Radix select popup is hard to drive via browser automation
+(re-render race) — project switching verified at API level; manual QA unaffected.

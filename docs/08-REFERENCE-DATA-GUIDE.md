@@ -67,7 +67,7 @@ timesheet editor works out of the box.
 
 | Area | Contents |
 |---|---|
-| RBAC | 32 permissions, 8 system roles, 12 users |
+| RBAC | 43 permissions, 8 system roles, 12 users |
 | Structure | 2 portfolios, 3 programs, 6 projects |
 | Planning | WBS trees, requirements, **104-style task registers** per project, dependencies, milestones, stage gates, activated baselines |
 | Execution | 13 resources, 14 assignments, 12 timesheets processed through the real approval cascade |

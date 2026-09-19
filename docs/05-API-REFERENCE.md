@@ -105,6 +105,29 @@ Cross-project planning screens read the same nested routes via filters.
 | `/api/stakeholders` | GET, POST, PATCH, DELETE | Stakeholder register |
 | `/api/notifications` (+`[id]`) | GET, POST / PATCH | In-app notifications |
 
+## Command Center domain (v3.0)
+
+All routes follow the standard conventions (JWT → RBAC → zod → audit → rate-limit) and emit realtime events (`agile:changed`, `field:changed`).
+
+| Route | Methods | Purpose |
+|---|---|---|
+| `GET /api/agile?projectId&sprintId` | GET | Agile board bundle: projects, sprints, epics, task cards (code/status/priority/points/sprint/epic/assignee) + summary (active sprint, backlog count, total points) — `project.view` |
+| `POST /api/agile` | POST | Create `type:"SPRINT"` (goal, window, one ACTIVE per project) or `type:"EPIC"` (code, color, business value) — `agile.manage` |
+| `PATCH /api/agile` | PATCH | Move/update a task card: `{taskId, status?, sprintId?, epicId?, storyPoints?, backlogOrder?}` — cross-project guards, sprint points recomputed, completing sets progress 100% — `inbox.use` |
+| `DELETE /api/agile?type=SPRINT\|EPIC&id=` | DELETE | Remove sprint (tasks return to backlog) or epic — `agile.manage` |
+| `/api/clients` (+`[id]`) | GET, POST / PATCH, DELETE | Client register with invoiced/paid/outstanding roll-ups per client; delete blocked while invoices exist — view `financial.view`, write `client.manage` |
+| `/api/invoices` (+`[id]`) | GET, POST / GET, PATCH, DELETE | Invoice register with line items; totals (subtotal/tax/total) computed server-side; lifecycle DRAFT→SENT→PAID (locked when paid), OVERDUE/VOID — `client.manage` |
+| `/api/expenses` (+`[id]`) | GET, POST / PATCH, DELETE | Expense register with category roll-ups and PENDING→APPROVED/REJECTED→REIMBURSED approval (approver stamped) — `client.manage` |
+| `/api/rfis` (+`[id]`) | GET, POST / PATCH, DELETE | RFI register with ageDays, unanswered>7d flag, cost/schedule impact totals; auto-code `RFI-####` per project; answer workflow stamps dateAnswered — view `project.view`, write `field.manage` |
+| `/api/daily-logs` (+`[id]`) | GET, POST / DELETE | Site diary (weather, crew, work, delays, safety) with summary (peak crew, incidents) — `field.manage` |
+| `/api/punch-list` (+`[id]`) | GET, POST / PATCH, DELETE | Punch items OPEN→IN_PROGRESS→CLOSED→VERIFIED with overdue tracking; auto-code `PUNCH-###` — `field.manage` |
+| `/api/feedback` (+`[id]`) | GET, POST / PATCH, DELETE | Feedback board sorted by votes; triage status + roadmap linking — view/mine `inbox.use`, triage `product.manage` |
+| `POST /api/feedback/[id]/vote` | POST | Toggle the caller's vote (unique per user) — `inbox.use` |
+| `/api/roadmap` (+`[id]`) | GET, POST / PATCH, DELETE | Roadmap items by quarter with progress, release tag, linked feedback counts — `product.manage` |
+| `/api/docs` (+`[id]`) | GET, POST / GET, PATCH, DELETE | Docs workspace: space-filtered page index with excerpts + full-text search; markdown content — `docs.use` |
+| `/api/message-boards` (+`[id]`) | GET, POST / GET, POST, PATCH, DELETE | Thread list (pinned first, last-activity) and thread detail with comments; reply updates replyCount/lastActivityAt — `boards.use` |
+| `/api/proofing` (+`[id]`) | GET, POST / GET, PATCH, POST, DELETE | Proof rounds per deliverable (auto round number) with annotation counts; PATCH takes a decision or `{annotationId, annotationResolved}`; POST adds an annotation (locator/xPct/yPct) — view `project.view`, decide `proofing.manage`, annotate `inbox.use` |
+
 ## Connect domain
 
 | Route | Methods | Purpose |

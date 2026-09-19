@@ -31,6 +31,15 @@ Eight system roles ship out of the box (full matrix in `docs/07-RBAC-MATRIX.md`)
 Every API route enforces permission codes server-side; the UI hides screens the
 session cannot use. Role assignments take effect on the user's next login/refresh.
 
+**v3.0 permissions** — seven new codes gate the Command Center modules:
+`agile.manage` (sprints/epics/backlog), `client.manage` (clients, invoices,
+expenses), `field.manage` (RFIs, daily logs, punch list), `product.manage`
+(feedback triage + roadmap), `docs.use`, `boards.use`, `proofing.manage`.
+They are mapped into the role templates (e.g. Finance gains `client.manage`;
+PM/Program roles gain agile/field/proofing; everyone gains docs/boards use).
+On an **existing** install run `npm run sync:rbac` to provision them without a
+reseed — see RBAC Matrix § Live-DB sync.
+
 ---
 
 ## 2. Import & Export (data exchange)

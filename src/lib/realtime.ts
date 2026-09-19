@@ -13,7 +13,8 @@ export type RealtimeEvent =
   | "governance:changed" | "alert:created" | "inbox:changed" | "planner:changed"
   | "integration:changed" | "automation:executed" | "notification:created" | "audit:created"
   | "data:imported" | "report:generated"
-  | "freshness:changed" | "simulation:completed" | "scenario:merged" | "benefits:updated" | "ai:action";
+  | "freshness:changed" | "simulation:completed" | "scenario:merged" | "benefits:updated" | "ai:action"
+  | "agile:changed" | "field:changed";
 
 export function emitRealtime(event: RealtimeEvent, payload: unknown, room?: string): void {
   const body = JSON.stringify({ event, payload, room });

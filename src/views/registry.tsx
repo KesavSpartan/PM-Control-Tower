@@ -60,6 +60,16 @@ const AdminTemplatesView = L(() => import("@/views/admin/templates"));
 const AdminAuditView = L(() => import("@/views/admin/audit"));
 const AdminSettingsView = L(() => import("@/views/admin/settings"));
 
+// --- Command Center expansion (v3.0) ---
+const BoardViewsView = L(() => import("@/views/execute/board-views"));
+const AgileBoardView = L(() => import("@/views/plan/agile"));
+const ClientsBillingView = L(() => import("@/views/clients/clients"));
+const FieldOpsScreenView = L(() => import("@/views/field/field-ops"));
+const FeedbackRoadmapView = L(() => import("@/views/strategy/feedback"));
+const DocsKnowledgeView = L(() => import("@/views/knowledge/docs"));
+const MessageBoardsView = L(() => import("@/views/knowledge/boards"));
+const ProofingApprovalsView = L(() => import("@/views/delivery/proofing"));
+
 function Fallback() { return <LoadingBlock label="Preparing workspace…" />; }
 
 export function renderView(segments: string[]): { C: ComponentType; key: string } {
@@ -109,6 +119,15 @@ export function renderView(segments: string[]): { C: ComponentType; key: string 
     case "webhooks": return { C: WebhooksView, key };
     case "ai-gateway": return { C: AiGatewayView, key };
     case "extensions": return { C: ExtensionsView, key };
+    // Command Center expansion (v3.0)
+    case "boards": return { C: BoardViewsView, key };
+    case "agile": return { C: AgileBoardView, key };
+    case "clients": return { C: ClientsBillingView, key };
+    case "field": return { C: FieldOpsScreenView, key };
+    case "feedback": return { C: FeedbackRoadmapView, key };
+    case "docs": return { C: DocsKnowledgeView, key };
+    case "boards-hub": return { C: MessageBoardsView, key };
+    case "proofing": return { C: ProofingApprovalsView, key };
     case "admin":
       switch (b) {
         case "roles": return { C: AdminRolesView, key };

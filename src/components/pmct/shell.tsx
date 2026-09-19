@@ -4,6 +4,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 import { api, getToken, socketState, onRealtime } from "@/lib/client";
 import { useRoute } from "@/lib/router";
 import { Button } from "@/components/ui/button";
@@ -12,13 +13,14 @@ import { CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, C
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { Server, 
+import { Server,
   Gauge, Layers, GitBranch, FolderKanban, ClipboardList, ListTree, CalendarRange, GanttChartSquare,
   Milestone, Layers3, Users, Clock, Inbox, CalendarCheck2, Wallet, TrendingUp, HeartPulse, ShieldAlert,
   ArrowLeftRight, ScanSearch, Landmark, BarChart3, LineChart, Sparkles, Plug, Blocks, Workflow, Bell,
   Webhook, BrainCircuit, UserCog, KeyRound, LayoutTemplate, ScrollText, Settings, Search, Plus, Menu,
   Radio, LogOut, CircleUser, TowerControl, Crown,
-  ShieldCheck, Target, BookOpen } from "lucide-react";
+  ShieldCheck, Target, BookOpen, FileDown, Loader2,
+  Columns3, Zap, Briefcase, HardHat, Megaphone, FileText, MessagesSquare, FileCheck2 } from "lucide-react";
 
 export interface SessionUser {
   id: string; email: string; name: string; isSuperAdmin: boolean;
@@ -43,6 +45,7 @@ const NAV: NavGroup[] = [
       { label: "Requirements", href: "/requirements", icon: ListTree, perm: "project.view" },
       { label: "WBS", href: "/wbs", icon: Network, perm: "project.view" },
       { label: "Tasks", href: "/tasks", icon: CalendarCheck2, perm: "project.view" },
+      { label: "Agile Delivery", href: "/agile", icon: Zap, perm: "project.view" },
       { label: "Schedule", href: "/schedule", icon: GanttChartSquare, perm: "project.view" },
       { label: "Milestones", href: "/milestones", icon: Milestone, perm: "project.view" },
       { label: "Baselines", href: "/baselines", icon: Layers3, perm: "project.view" },
@@ -50,6 +53,7 @@ const NAV: NavGroup[] = [
   },
   {
     label: "Execute", items: [
+      { label: "Boards", href: "/boards", icon: Columns3, perm: "project.view" },
       { label: "Resources", href: "/resources", icon: Users, perm: "resource.view" },
       { label: "Timesheets", href: "/timesheets", icon: Clock, perm: "timesheet.own" },
       { label: "Work Inbox", href: "/inbox", icon: Inbox, perm: "inbox.use" },
@@ -59,6 +63,8 @@ const NAV: NavGroup[] = [
   {
     label: "Control", items: [
       { label: "Financials", href: "/financials", icon: Wallet, perm: "financial.view" },
+      { label: "Clients & Billing", href: "/clients", icon: Briefcase, perm: "financial.view" },
+      { label: "Field Operations", href: "/field", icon: HardHat, perm: "project.view" },
       { label: "Investment & Business Case", href: "/investment", icon: TrendingUp, perm: "financial.view" },
       { label: "EVM", href: "/evm", icon: TrendingUp, perm: "evm.view" },
       { label: "Health", href: "/health", icon: HeartPulse, perm: "evm.view" },
@@ -69,6 +75,14 @@ const NAV: NavGroup[] = [
       { label: "Data Integrity", href: "/integrity", icon: ShieldCheck, perm: "integrity.view" },
       { label: "CTO Tower", href: "/technology", icon: Server, perm: "integration.view" },
       { label: "Prioritization", href: "/prioritization", icon: Target, perm: "portfolio.view" },
+    ],
+  },
+  {
+    label: "Strategy & Knowledge", items: [
+      { label: "Feedback & Roadmap", href: "/feedback", icon: Megaphone, perm: "inbox.use" },
+      { label: "Docs & Knowledge", href: "/docs", icon: FileText, perm: "docs.use" },
+      { label: "Message Boards", href: "/boards-hub", icon: MessagesSquare, perm: "boards.use" },
+      { label: "Proofing & Approvals", href: "/proofing", icon: FileCheck2, perm: "project.view" },
     ],
   },
   {
@@ -206,6 +220,41 @@ export function AppShell({ user, children, onLogout }: { user: SessionUser; chil
   const [searchResults, setSearchResults] = useState<{ projects: { id: string; code: string; name: string }[]; tasks: { id: string; code: string; name: string; projectName?: string }[] } | null>(null);
   const [notifCount, setNotifCount] = useState(0);
   const [rtConnected, setRtConnected] = useState(socketState());
+  const [pdfBusy, setPdfBusy] = useState(false);
+
+  // All-tabs PDF export: one report containing every permitted module.
+  const downloadAllTabsPdf = async () => {
+    if (pdfBusy) return;
+    setPdfBusy(true);
+    try {
+      const token = getToken();
+      const res = await fetch("/api/export/all-tabs", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        let msg = `Export failed (${res.status})`;
+        try { const j = await res.json(); if (j?.error) msg = j.error; } catch { /* keep default */ }
+        throw new Error(msg);
+      }
+      const blob = await res.blob();
+      const cd = res.headers.get("Content-Disposition") ?? "";
+      const m = /filename="([^"]+)"/.exec(cd);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = m?.[1] ?? "pmct-all-tabs.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      toast.success("All-tabs PDF downloaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "PDF export failed");
+    } finally {
+      setPdfBusy(false);
+    }
+  };
 
   // breadcrumbs from route
   const crumbs = useMemo(() => {
@@ -355,6 +404,17 @@ export function AppShell({ user, children, onLogout }: { user: SessionUser; chil
                   {notifCount > 99 ? "99+" : notifCount}
                 </span>
               )}
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              aria-label="Download all tabs as PDF"
+              title="Download all tabs as one PDF report"
+              disabled={pdfBusy}
+              onClick={downloadAllTabsPdf}
+            >
+              {pdfBusy ? <Loader2 className="h-4 w-4 animate-spin text-blue-600" /> : <FileDown className="h-4 w-4 text-slate-500" />}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

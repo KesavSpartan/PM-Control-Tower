@@ -16,7 +16,7 @@
 
 ## 2. Authorization
 
-- **RBAC**: 32 permission codes × 8 roles (full matrix in `docs/07-RBAC-MATRIX.md`),
+- **RBAC**: 43 permission codes × 8 roles (full matrix in `docs/07-RBAC-MATRIX.md`),
   enforced inside the API wrapper on **every** route; the UI only mirrors the
   server's decisions.
 - **Wildcard & break-glass**: `PMO_ADMIN` role holds `*`; `User.isSuperAdmin`

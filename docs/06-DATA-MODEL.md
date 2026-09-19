@@ -1,6 +1,6 @@
 # 06 — Data Model Reference
 
-Source of truth: `prisma/schema.prisma` — **57 models**, SQLite profile
+Source of truth: `prisma/schema.prisma` — **115 models**, SQLite profile
 (enums as `String` constants, JSON payloads as `String` columns; portable to
 PostgreSQL). All ids are `cuid()`; most business entities also carry a unique
 human **code** (`PRJ-ERP-001`, `RSK-…`, `DEC-101`) used by import/export upserts.
@@ -11,7 +11,7 @@ human **code** (`PRJ-ERP-001`, `RSK-…`, `DEC-101`) used by import/export upser
 |---|---|---|
 | `User` | email (unique), passwordHash, name, title, department, isActive, isSuperAdmin, lastLoginAt, failedLogins, lockedUntil | Lockout fields drive brute-force protection |
 | `Role` | code (unique), name, level, isSystem | 8 system roles seeded |
-| `Permission` | code (unique), category | 32-permission catalog (`src/lib/rbac.ts`) |
+| `Permission` | code (unique), category | 43-permission catalog (`src/lib/rbac.ts`) |
 | `UserRole` | userId + roleId | composite PK, multi-role capable |
 | `RolePermission` | roleId + permissionId | role→permission grants |
 
@@ -28,7 +28,7 @@ healthScore, ragStatus, charter, objectives, successCriteria.
 
 - `WBSNode` — tree (parentId), nodeType, level, orderIndex, ownerName, planned/actual hours & cost, progress.
 - `Requirement` — reqCode, reqType, priority, status, acceptanceCriteria, effortEstimate; links WBSNode.
-- `Task` — projectId, wbsId, tree (parentId), status, priority, criticality, dates, durationDays, progress, planned/actual/remaining hours, planned/actual cost, assignee (User), CPM fields (isCritical, earliestStart/Finish, latestStart/Finish, totalFloat, freeFloat, constraintType).
+- `Task` — projectId, wbsId, tree (parentId), status, priority, criticality, dates, durationDays, progress, planned/actual/remaining hours, planned/actual cost, assignee (User), CPM fields (isCritical, earliestStart/Finish, latestStart/Finish, totalFloat, freeFloat, constraintType); **agile fields (v3.0)**: `epicId`, `sprintId`, `storyPoints`, `backlogOrder`.
 - `Dependency` — predecessorId, successorId, depType (`FS/SF/SS/FF`), lagDays, isExternal, externalRef.
 - `Milestone` — code, dueDate, baselineDate, status, isCritical, completedAt, gateId.
 - `Baseline` — version, name, status, baselineStart/Finish/Hours/Cost, snapshotJson (full schedule snapshot), activatedAt.
@@ -111,6 +111,49 @@ and CLIs.
 - `ReportSnapshot` — versioned report: scope (`PORTFOLIO`/`PROJECT`), projectId, title, periodStart/End, version, generatedBy, headlineJson, payloadJson (full pack content).
 - `ReportSchedule` — frequency (`DAILY/WEEKLY/MONTHLY/QUARTERLY`), scope, sections, recipients, deliveryChannel, isActive, lastRunAt/nextRunAt, lastRunSummary.
 
+## 15. Command Center expansion (16 models, v3.0)
+
+**Agile delivery** — `Sprint` (projectId, name, goal, status PLANNED/ACTIVE/COMPLETED —
+one ACTIVE enforced per project, startDate/endDate, committedPoints recomputed server-side) ·
+`Epic` (code, name, colorHex, status, businessValue). Task references both via
+SetNull FKs — deleting a sprint/epic never loses tasks.
+
+**Commercial** — `Client` (name, organization, contact, status PROSPECT/ACTIVE/
+ON_HOLD/CHURNED, portalUrl; delete blocked while invoices exist) ·
+`Invoice` (number unique, clientId, projectId?, status DRAFT/SENT/PAID/OVERDUE/VOID,
+issueDate/dueDate/paidAt, taxPct, subtotal/taxAmount/total server-computed) ·
+`InvoiceLine` (description, quantity, unitPrice, total, optional taskId) ·
+`Expense` (projectId, category, amount, billable, vendorName, receiptUrl, status
+PENDING/APPROVED/REJECTED/REIMBURSED, approvedByName stamped).
+
+**Field operations** — `Rfi` (rfiCode unique per project, subject, body,
+discipline, priority, status DRAFT/OPEN/ANSWERED/CLOSED, askedBy/assignedTo,
+dateOpened/dateAnswered, answer, costImpact, scheduleImpactDays) ·
+`DailyLog` (logDate, weather, temperatureC, crewCount, equipmentUsed,
+workPerformed, delays, safetyIncidents, inspections) ·
+`PunchListItem` (code unique per project, title, location, severity, status
+OPEN/IN_PROGRESS/CLOSED/VERIFIED, assigneeName, dueDate, closedAt).
+
+**Product strategy** — `FeedbackPost` (title, body, category BUG/FEATURE/IDEA/
+INTEGRATION/UX, source, triage status NEW/UNDER_REVIEW/PLANNED/IN_PROGRESS/
+SHIPPED/DECLINED, votesCount denormalized, optional project + roadmapItem links) ·
+`FeedbackVote` (unique postId+voterKey — one vote per user, toggled) ·
+`RoadmapItem` (title, quarter `2026-Q4`, status PLANNED/COMMITTED/IN_PROGRESS/
+SHIPPED/DEFERRED, progress, releaseTag, project/objective links, orderIndex).
+
+**Knowledge & communication** — `DocPage` (title, icon, markdown `content`,
+space GENERAL/ENGINEERING/CONSTRUCTION/FINANCE/PRODUCT/GOVERNANCE, tags,
+parentId, author, isPublished, orderIndex) ·
+`BoardThread` (projectId?, title, category GENERAL/ANNOUNCEMENTS/STANDUP/Q_AND_A/
+RISKS/WINS, pinned, replyCount, lastActivityAt) — replies reuse the generic
+`Comment` model with `entityType="BOARD_THREAD"`.
+
+**Proofing** — `ProofRound` (deliverableId, roundNumber auto-increment per
+deliverable, versionLabel, fileUrl, status PENDING/IN_REVIEW/CHANGES_REQUESTED/
+APPROVED, dueDate, reviewerName, decisionAt) ·
+`ProofAnnotation` (roundId, locator page/timecode, xPct/yPct, comment,
+authorName, resolved).
+
 ## ER overview (major relations)
 
 ```
@@ -124,8 +167,17 @@ Portfolio 1─* Program 1─* Project 1─* WBSNode 1─* Task *─* Task (depen
                                    ├─* ChangeRequest / StageGate
                                    ├─* Deliverable / QualityRecord
                                    ├─* ProjectHealthSnapshot / ProjectForecast
-                                   └─* Assignment
+                                   ├─* Assignment
+                                   ├─* Sprint / Epic ──* Task (agile, v3.0)
+                                   ├─* Rfi / DailyLog / PunchListItem (field, v3.0)
+                                   ├─* Invoice ──1 Client      (v3.0)
+                                   ├─* Expense                 (v3.0)
+                                   └─* FeedbackPost / BoardThread / DocPage (v3.0)
+Deliverable ─* ProofRound ─* ProofAnnotation (v3.0)
+FeedbackPost ─* FeedbackVote;  RoadmapItem ─* FeedbackPost (v3.0)
 User *─* Role *─* Permission        User ─1 InboxItem / Notification / PlannerEntry
 Project ─* Decision / ActionItem / ProjectKpi (leadership registers)
 ReportSnapshot / ReportSchedule     AuditEvent (global)
 ```
+
+Full ERD including cardinalities: `docs/COMMAND-CENTER-PRD.md` § 3.

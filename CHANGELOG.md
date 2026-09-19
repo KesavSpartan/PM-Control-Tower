@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 3.0.0 — COMMAND CENTER EXPANSION (2026-09-19)
+
+Omni-functional unified execution platform release: closes the six missing capability clusters vs the 40-app "Command Center" mega-scope, all on the single Project/Task core (see `docs/COMMAND-CENTER-PRD.md` for the full PRD, architecture, ERD and per-app coverage matrix).
+
+**Agile & Scrum (`/agile`)** — Sprints (PLANNED/ACTIVE/COMPLETED, one active per project, sprint goals + date windows), Epics (color-coded themes with business value), story points (Fibonacci picker, server-recomputed committed points), backlog grooming with pull-into-sprint, drag-and-drop sprint board (dnd-kit) with optimistic card moves. Task gains `sprintId`/`epicId`/`storyPoints`/`backlogOrder`.
+
+**Omni task views (`/boards`)** — the same Task entity as Kanban (status lanes, cross-project or per-project, drag & drop, drag overlay), delivery Calendar (month grid of task due dates + meetings, today marker, weekend shading), and Workload heatmap (resource × week utilization from `/api/capacity`, over-allocation in red, 4–26 week window).
+
+**Product strategy (`/feedback`)** — feedback portal with one-vote-per-user toggling, triage workflow (NEW → UNDER_REVIEW → PLANNED → IN_PROGRESS → SHIPPED/DECLINED), and quarter-based Roadmap (progress bars, release tags, feedback→roadmap demand linking).
+
+**Knowledge & communication (`/docs`, `/boards-hub`)** — Docs-first workspace: six spaces, markdown pages with tables/checklists, search, edit/preview; Message Boards: pinned announcements, standups, Q&A threads with reply counts and last-activity ordering, built on the generic Comment primitive.
+
+**Commercial operations (`/clients`)** — Client register (revenue roll-ups per client), Invoices with line items (server-computed subtotal/tax/total, DRAFT→SENT→PAID lifecycle, paid invoices locked, milestone/task-linked lines), Expenses with approval workflow (PENDING→APPROVED/REJECTED→REIMBURSED, billable tracking, category roll-ups).
+
+**Field operations (`/field`)** — RFI register with aging discipline (unanswered >7d flagged, cost + schedule impact totals, answer workflow), Daily construction logs (weather/crew/work/delays/safety), Punch list with OPEN→IN_PROGRESS→CLOSED→VERIFIED verification chain, BIM model viewer (embeddable ACC/model-service URL).
+
+**Proofing & approvals (`/proofing`)** — versioned proof rounds per deliverable (auto round numbering, reviewer + due date), threaded annotations with page/timecode locators and resolve toggling, APPROVED / CHANGES_REQUESTED decisions with reopen.
+
+**Platform** — 16 new Prisma models + Task/Project extensions (schema pushed additively); 20 new API route files (all withApi: JWT → RBAC → zod → audit → rate-limit → realtime); 7 new permission codes (`agile.manage`, `client.manage`, `field.manage`, `product.manage`, `docs.use`, `boards.use`, `proofing.manage`) mapped into all 8 role templates + `scripts/sync-rbac.ts` for live-DB upsert; new "Strategy & Knowledge" nav group; realtime events `agile:changed`/`field:changed`; idempotent `scripts/seed-command-center.ts` (`npm run seed:command-center`).
+
+**Verification** — prisma validate/push clean; tsc clean for all new code (pre-existing unrelated errors unchanged); live smoke tests: 13 GET endpoints 200 + 10 mutation flows pass; RBAC negative matrix (TEAM_MEMBER 403 on client/field/product mutations, allowed on card moves/votes); GUI pass over all 8 views with screenshots in `gui-test-screenshots/`.
+
 ## 2.7.0 — ENTERPRISE GANTT UPGRADE (2026-09-13)
 
 - Complete Gantt rebuild in TeamGantt style: split-panel layout (task list left + timeline right), colored phase bars with progress fill, CPM critical path in red, dependency arrows (SVG with arrowheads), today marker, weekend shading, collapsible WBS groups, zoom levels (day/week/month), RAG/progress indicators per task, and legend.

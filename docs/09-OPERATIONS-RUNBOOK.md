@@ -41,7 +41,9 @@ the business-level log of who changed what.
 ## 4. Upgrade procedure
 
 See Deployment Guide § 7. Summary: backup → replace code → `npm ci` →
-`npx prisma db push` → `npm run build` → restart app + gateway. Schema changes in
+`npx prisma db push` → `npm run sync:rbac` (v3.0+: provision new permission codes)
+→ optional `npm run seed:command-center` (demo data, idempotent) → `npm run build`
+→ restart app + gateway. Schema changes in
 this product line are additive; `db push` is non-destructive. Verify with the
 readiness probe plus one screen per domain.
 

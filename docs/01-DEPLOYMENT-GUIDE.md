@@ -5,7 +5,7 @@ modes. All modes run the same two processes:
 
 | Process | What it is | Default port |
 |---|---|---|
-| **app** | Next.js 16 standalone production server (UI + 104 API routes) | 3000 |
+| **app** | Next.js 16 standalone production server (UI + 167 API route files) | 3000 |
 | **realtime** | Socket.IO gateway mini service (live event fan-out) | 3003 |
 
 The database is a single SQLite file whose path is set by `DATABASE_URL`. The realtime
@@ -123,6 +123,26 @@ bun run realtime &               # gateway
 
 ---
 
+## 5b. Mode D — Windows deployment pack (one-click application)
+
+For Windows servers and desktops, `deployment/pack.ps1` builds a self-contained
+application package: `dist/PM-Control-Tower-Deploy-v<version>-<timestamp>.zip`
+(~100 MB) containing the compiled app, an embedded-runtime launcher
+(`PM-Control-Tower.exe`, built with Node SEA), first-run setup, backup/restore
+tooling and its own documentation (`docs/` inside the pack).
+
+```powershell
+powershell -File deployment\pack.ps1              # full pack (build + exe + data snapshot)
+powershell -File deployment\pack.ps1 -NoBuild     # reuse the existing .next\standalone
+powershell -File deployment\pack.ps1 -NoDb        # ship without the data snapshot
+```
+
+On the target machine: extract, run `deploy.cmd`, open `http://localhost:3000`.
+`backup.cmd` / `restore.cmd` replace `deploy/backup.sh` on Windows. Full details:
+`deployment/docs/DEPLOYMENT-GUIDE.md` and `deployment/docs/BACKUP-AND-RECOVERY.md`.
+
+---
+
 ## 6. Data persistence & backups
 
 - Everything stateful lives in **one SQLite file** (`$DATABASE_URL`).
@@ -146,7 +166,11 @@ bun run realtime &               # gateway
 3. Reinstall dependencies (`npm ci` / `bun install --frozen-lockfile`).
 4. `npx prisma db push` (schema is migrated non-destructively; additive fields are
    backfilled with defaults).
-5. Rebuild: `npm run build`, then restart both processes.
+5. **v3.0+**: sync the RBAC catalog so the new permissions exist in a live DB:
+   `npm run sync:rbac` (upserts 43 permissions × 8 role templates, prunes retired codes).
+6. Optionally load the Command Center demo data: `npm run seed:command-center`
+   (idempotent — skips any module already seeded).
+7. Rebuild: `npm run build`, then restart both processes.
 
 Roll back = restore the previous backup file and the previous release directory.
 

@@ -4,8 +4,8 @@ Audit of the 42-section master development prompt against the implemented platfo
 Verdict per domain: ✅ exists · 🟡 partial (extend later) · ❌ not built (roadmap).
 
 ## Already implemented ✅ (verify in-product)
-- **§1 Connected data model** — Portfolio→Program→Project→WBS→Task→Dependency→Milestone→Resource→Assignment→Timesheet→Cost→EVM→Health→Governance→Benefits, one operational model; 66 data models.
-- **§2 RBAC** — 8 system roles / 36 permissions, super-admin, permission-gated routes and nav.
+- **§1 Connected data model** — Portfolio→Program→Project→WBS→Task→Dependency→Milestone→Resource→Assignment→Timesheet→Cost→EVM→Health→Governance→Benefits, one operational model; 115 data models (incl. the 16-model Command Center expansion — agile, commercial, field ops, strategy/knowledge, proofing).
+- **§2 RBAC** — 8 system roles / 43 permissions, super-admin, permission-gated routes and nav.
 - **§3 PMO tower** — Executive Control Tower: portfolio KPIs, RAG distribution, investment view, top risks, governance queue, capacity, EVM by project, actual-hours trend + **Data freshness rail**.
 - **§4 PM workspace** — ProjectWorkspace: health, EVM, schedule/CPM, milestones, RAID, changes, gates, timesheets; full-field EVM period form (v1.2.1).
 - **§5 Resources** — register, capacity/utilization/over-allocation, rates, assignments, timesheets.
@@ -46,3 +46,32 @@ Verdict per domain: ✅ exists · 🟡 partial (extend later) · ❌ not built (
 
 ## Positioning
 With v1.2.x the platform already delivers the master prompt's core promise — *enter data once → intelligence everywhere* — on a single operational model with the Integrity Layer as its differentiator. The remaining roadmap items (§8/§9/§21 + report library) are additive domains, not re-architecture.
+
+---
+
+## v3.0 Command Center coverage addendum (2026-09-19)
+
+The original 42-section audit targeted the PPM core. The v3.0 "Command Center"
+expansion closes the remaining clusters from the omni-functional 40-app scope
+(ClickUp · Monday · Jira · Linear · Notion · Coda · Aha! · Productboard ·
+Filestage · ProofHub · Workfront · Zoho Projects · Teamwork · ActiveCollab ·
+Paymo · TeamGantt · GanttPRO · MS Project · ProjectManager · Procore · Autodesk
+Construction Cloud · Primavera · InEight …):
+
+| Cluster | Status | Where |
+|---|---|---|
+| Agile / Scrum (sprints, epics, story points, backlog) | ✅ v3.0 | `/agile` · Sprint, Epic models · storyPoints on Task |
+| Omni task views (Kanban, Calendar, Workload) | ✅ v3.0 | `/boards` (Kanban dnd-kit, month calendar, capacity heatmap) |
+| Product strategy (feedback voting, roadmap) | ✅ v3.0 | `/feedback` · FeedbackPost/Vote, RoadmapItem |
+| Docs-first workspace | ✅ v3.0 | `/docs` · DocPage spaces + markdown |
+| Communication hub (message boards) | ✅ v3.0 | `/boards-hub` · BoardThread + Comment |
+| Client ops (clients, invoices, expenses) | ✅ v3.0 | `/clients` · Client, Invoice(+lines), Expense |
+| Construction field ops (RFIs, daily logs, punch) | ✅ v3.0 | `/field` · Rfi, DailyLog, PunchListItem |
+| BIM integration | 🟡 v3.0 | `/field` BIM viewer embed (iframe URL) — deep model API is connector roadmap |
+| Integrated proofing (rounds, annotations, approvals) | ✅ v3.0 | `/proofing` · ProofRound, ProofAnnotation |
+| Native code sync (commit/PR → task) | 🟡 partial | Integration hub + TechRelease conduit; auto-linking is a connector (roadmap §6 of PRD) |
+| Whiteboard / Map views | ❌ roadmap | view-layer only, no schema change needed |
+| ERP GL posting | 🟡 partial | Invoice/Expense payloads ready; connector roadmap |
+
+Footprint after v3.0: **115 models · 167 route files · 70+ views · 43 permissions**.
+Full detail: `docs/COMMAND-CENTER-PRD.md`.

@@ -210,6 +210,57 @@ model Project {
   projectScore     ProjectScore?
   uatCycles        UatCycle[]
   scheduleScenarios ScheduleScenario[]
+  // Command Center expansion (v3.0)
+  clientId         String?
+  client           Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  epics            Epic[]
+  sprints          Sprint[]
+  rfis             Rfi[]
+  dailyLogs        DailyLog[]
+  punchListItems   PunchListItem[]
+  invoices         Invoice[]
+  expenses         Expense[]
+  feedbackPosts    FeedbackPost[]
+  roadmapItems     RoadmapItem[]
+  boardThreads     BoardThread[]
+}
+
+// ============ COMMAND CENTER EXPANSION (v3.0) ============
+
+// --- Agile delivery: epics, sprints, story points on Task ---
+model Epic {
+  id            String   @id @default(cuid())
+  projectId     String
+  code          String
+  name          String
+  colorHex      String   @default("#2563eb")
+  status        String   @default("OPEN") // OPEN | IN_PROGRESS | DONE
+  businessValue String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+
+  @@index([projectId])
+}
+
+model Sprint {
+  id              String    @id @default(cuid())
+  projectId       String
+  name            String
+  goal            String?
+  status          String    @default("PLANNED") // PLANNED | ACTIVE | COMPLETED
+  startDate       DateTime?
+  endDate         DateTime?
+  committedPoints Float     @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+
+  @@index([projectId, status])
 }
 
 // ============ PLANNING: SCOPE → WBS → TASKS ============
@@ -311,6 +362,13 @@ model Task {
   entries     TimesheetEntry[]
   plannerEntries PlannerEntry[]
   assignments Assignment[]
+  // Agile (Command Center v3.0)
+  epic        Epic?    @relation(fields: [epicId], references: [id], onDelete: SetNull)
+  sprint      Sprint?  @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+  epicId      String?
+  sprintId    String?
+  storyPoints Float    @default(0)
+  backlogOrder Int     @default(0)
 
   @@index([projectId])
   @@index([wbsId])
@@ -792,8 +850,294 @@ model Deliverable {
   createdAt          DateTime  @default(now())
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  proofRounds ProofRound[]
 
   @@index([projectId])
+}
+
+// ============ COMMAND CENTER: COMMERCIAL (CLIENTS, INVOICES, EXPENSES) ============
+
+model Client {
+  id           String  @id @default(cuid())
+  name         String
+  organization String?
+  contactName  String?
+  email        String?
+  phone        String?
+  portalUrl    String?
+  status       String  @default("ACTIVE") // PROSPECT | ACTIVE | ON_HOLD | CHURNED
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  projects Project[]
+  invoices Invoice[]
+
+  @@index([status])
+}
+
+model Invoice {
+  id        String    @id @default(cuid())
+  clientId  String
+  projectId String?
+  number    String    @unique
+  status    String    @default("DRAFT") // DRAFT | SENT | PAID | OVERDUE | VOID
+  currency  String    @default("USD")
+  issueDate DateTime?
+  dueDate   DateTime?
+  paidAt    DateTime?
+  taxPct    Float     @default(0)
+  subtotal  Float     @default(0)
+  taxAmount Float     @default(0)
+  total     Float     @default(0)
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  client  Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  project Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  lines   InvoiceLine[]
+
+  @@index([clientId])
+  @@index([status])
+}
+
+model InvoiceLine {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  description String
+  quantity    Float   @default(1)
+  unitPrice   Float   @default(0)
+  total       Float   @default(0)
+  taskId      String?
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model Expense {
+  id              String   @id @default(cuid())
+  projectId       String
+  category        String   @default("OTHER") // LABOR | MATERIALS | EQUIPMENT | TRAVEL | SOFTWARE | SERVICES | OTHER
+  description     String
+  amount          Float    @default(0)
+  currency        String   @default("USD")
+  expenseDate     DateTime @default(now())
+  billable        Boolean  @default(true)
+  vendorName      String?
+  receiptUrl      String?
+  status          String   @default("PENDING") // PENDING | APPROVED | REJECTED | REIMBURSED
+  approvedByName  String?
+  createdAt       DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([expenseDate])
+}
+
+// ============ COMMAND CENTER: FIELD OPERATIONS (CONSTRUCTION) ============
+
+model Rfi {
+  id                 String    @id @default(cuid())
+  projectId          String
+  rfiCode            String
+  subject            String
+  body               String?
+  discipline         String    @default("GENERAL") // GENERAL | STRUCTURAL | MEP | ARCHITECTURAL | CIVIL | ELECTRICAL | SOFTWARE
+  status             String    @default("OPEN") // DRAFT | OPEN | ANSWERED | CLOSED
+  priority           String    @default("MEDIUM")
+  askedByName        String?
+  assignedToName     String?
+  dateOpened         DateTime  @default(now())
+  dateAnswered       DateTime?
+  answer             String?
+  costImpact         Float     @default(0)
+  scheduleImpactDays Float     @default(0)
+  attachmentUrl      String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, rfiCode])
+  @@index([projectId, status])
+}
+
+model DailyLog {
+  id               String   @id @default(cuid())
+  projectId        String
+  logDate          DateTime
+  weather          String?
+  temperatureC     Float?
+  crewCount        Int      @default(0)
+  equipmentUsed    String?
+  workPerformed    String?
+  delays           String?
+  safetyIncidents  Int      @default(0)
+  inspections      String?
+  notes            String?
+  createdByName    String?
+  createdAt        DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, logDate])
+}
+
+model PunchListItem {
+  id            String    @id @default(cuid())
+  projectId     String
+  code          String
+  title         String
+  description   String?
+  location      String?
+  severity      String    @default("MEDIUM") // LOW | MEDIUM | HIGH
+  status        String    @default("OPEN") // OPEN | IN_PROGRESS | CLOSED | VERIFIED
+  assigneeName  String?
+  dueDate       DateTime?
+  closedAt      DateTime?
+  createdAt     DateTime  @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, code])
+  @@index([projectId, status])
+}
+
+// ============ COMMAND CENTER: PRODUCT STRATEGY (FEEDBACK, ROADMAP) ============
+
+model FeedbackPost {
+  id              String   @id @default(cuid())
+  title           String
+  body            String?
+  category        String   @default("FEATURE") // BUG | FEATURE | IDEA | INTEGRATION | UX
+  source          String   @default("INTERNAL") // INTERNAL | CLIENT | PORTAL
+  status          String   @default("NEW") // NEW | UNDER_REVIEW | PLANNED | IN_PROGRESS | SHIPPED | DECLINED
+  projectId       String?
+  submittedByName String?
+  submittedByEmail String?
+  votesCount      Int      @default(0)
+  roadmapItemId   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  project     Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  roadmapItem RoadmapItem? @relation(fields: [roadmapItemId], references: [id], onDelete: SetNull)
+  votes       FeedbackVote[]
+
+  @@index([status])
+  @@index([votesCount])
+}
+
+model FeedbackVote {
+  id       String   @id @default(cuid())
+  postId   String
+  voterKey String
+  createdAt DateTime @default(now())
+
+  post FeedbackPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, voterKey])
+}
+
+model RoadmapItem {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  quarter      String   @default("2026-Q4") // e.g. 2026-Q4
+  status       String   @default("PLANNED") // PLANNED | COMMITTED | IN_PROGRESS | SHIPPED | DEFERRED
+  progress     Float    @default(0)
+  releaseTag   String?
+  projectId    String?
+  objectiveId  String?
+  orderIndex   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  project        Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  linkedFeedback FeedbackPost[]
+
+  @@index([quarter])
+  @@index([status])
+}
+
+// ============ COMMAND CENTER: KNOWLEDGE (DOCS) & COMMUNICATION (BOARDS) ============
+
+model DocPage {
+  id        String   @id @default(cuid())
+  title     String
+  icon      String   @default("📄")
+  content   String   @default("") // Markdown body; supports embedded tables
+  space     String   @default("GENERAL") // GENERAL | ENGINEERING | CONSTRUCTION | FINANCE | PRODUCT | GOVERNANCE
+  tags      String?
+  parentId  String?
+  projectId String?
+  authorId  String?
+  authorName String?
+  isPublished Boolean @default(true)
+  orderIndex Int     @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([space])
+  @@index([updatedAt])
+}
+
+model BoardThread {
+  id             String   @id @default(cuid())
+  projectId      String?
+  title          String
+  category       String   @default("GENERAL") // GENERAL | ANNOUNCEMENTS | STANDUP | Q_AND_A | RISKS | WINS
+  createdById    String?
+  createdByName  String?
+  pinned         Boolean  @default(false)
+  replyCount     Int      @default(0)
+  lastActivityAt DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([lastActivityAt])
+}
+
+// ============ COMMAND CENTER: PROOFING & APPROVALS ============
+
+model ProofRound {
+  id            String    @id @default(cuid())
+  deliverableId String
+  roundNumber   Int       @default(1)
+  versionLabel  String    @default("v1")
+  fileUrl       String?
+  status        String    @default("PENDING") // PENDING | IN_REVIEW | CHANGES_REQUESTED | APPROVED
+  dueDate       DateTime?
+  reviewerName  String?
+  decisionAt    DateTime?
+  notes         String?
+  createdAt     DateTime  @default(now())
+
+  deliverable Deliverable      @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+  annotations ProofAnnotation[]
+
+  @@index([deliverableId])
+}
+
+model ProofAnnotation {
+  id         String   @id @default(cuid())
+  roundId    String
+  locator    String   @default("") // page number or timecode
+  xPct       Float?
+  yPct       Float?
+  comment    String
+  authorName String?
+  resolved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  round ProofRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  @@index([roundId])
 }
 
 model QualityRecord {
@@ -1601,6 +1945,8 @@ model ProjectScore {
   overrideBy    String?
   costEstimate  Float    @default(0)
   expectedValue Float    @default(0)
+  mandatory     Boolean  @default(false) // regulatory / contractual / strategically critical — always funded first
+  dependsOnJson String   @default("[]")  // [projectId] — project-level dependencies honored by the optimizer
   scoredAt      DateTime @default(now()) @updatedAt
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -1609,15 +1955,71 @@ model ProjectScore {
 }
 
 model PortfolioScenario {
+  id                String    @id @default(cuid())
+  name              String
+  budget            Float
+  maxProjects       Int?
+  selectedJson      String
+  excludedJson      String
+  totalScore        Float
+  invested          Float
+  // --- Executive decision workflow (v2.8) ---
+  status            String    @default("DRAFT") // DRAFT|OPTIMIZED|EXECUTIVE_REVIEW|CHANGES_REQUESTED|APPROVED|PUBLISHED|LOCKED
+  scenarioKey       String?   // preset key e.g. MAXIMIZE_STRATEGIC_VALUE | CUSTOM
+  createdBy         String?
+  ownerName         String?
+  totalValue        Float     @default(0)
+  weightsJson       String    @default("[]")  // criteria snapshot used for this optimization
+  constraintsJson   String    @default("{}")  // full optimization input (constraints, preset, resource/budget limits)
+  resultsJson       String    @default("{}")  // executive result bundle (KPIs, cards, insights, what-changed)
+  engineVersion     String    @default("1.0.0")
+  previousScenarioId String?
+  decisionNote      String?
+  decidedBy         String?
+  decidedAt         DateTime?
+  createdAt         DateTime  @default(now())
+}
+
+model Comment {
   id           String   @id @default(cuid())
-  name         String
-  budget       Float
-  maxProjects  Int?
-  selectedJson String
-  excludedJson String
-  totalScore   Float
-  invested     Float
+  entityType   String   // PROJECT | TASK | … (extensible)
+  entityId     String
+  authorId     String?
+  authorName   String
+  body         String
+  mentionsJson String   @default("[]") // [userId] mentioned users
   createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// ============ PROJECT INTAKE FORMS (ClickUp-Forms analog, v2.8) ============
+
+model IntakeSubmission {
+  id                  String   @id @default(cuid())
+  reference           String   @unique // INT-YYYYMMDD-XXXX
+  name                String
+  sponsorName         String
+  sponsorEmail        String
+  businessUnit        String?
+  strategicObjective  String?
+  description         String
+  estimatedBudget     Float    @default(0)
+  expectedValue       Float    @default(0)
+  urgency             String   @default("MEDIUM") // LOW | MEDIUM | HIGH | CRITICAL
+  mandatory           Boolean  @default(false)    // regulatory / contractual commitment
+  notes               String?
+  status              String   @default("NEW")    // NEW | TRIAGED | CONVERTED | REJECTED
+  triageNote          String?
+  triagedBy           String?
+  createdProjectId    String?
+  sourceIp            String?
+  createdAt           DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 // ============ ENTERPRISE REPORTING CENTER (v1.6.0) ============
@@ -1786,6 +2188,7 @@ model AdminSettings {
   confidentialityLabel String @default("CONFIDENTIAL — INTERNAL MANAGEMENT USE ONLY")
   currency             String @default("USD")
   dateFormat           String @default("YYYY-MM-DD")
+  prioritizationConfigJson String @default("{}") // executive prioritization: RAG thresholds, alerts, decision categories, presets, KPI defs
 }
 
 // ============ IDENTITY & ACCESS (v2.0.0) ============
