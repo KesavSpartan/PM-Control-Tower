@@ -20,7 +20,8 @@ import { Server,
   Webhook, BrainCircuit, UserCog, KeyRound, LayoutTemplate, ScrollText, Settings, Search, Plus, Menu,
   Radio, LogOut, CircleUser, TowerControl, Crown,
   ShieldCheck, Target, BookOpen, FileDown, Loader2,
-  Columns3, Zap, Briefcase, HardHat, Megaphone, FileText, MessagesSquare, FileCheck2 } from "lucide-react";
+  Columns3, Zap, Briefcase, HardHat, Megaphone, FileText, MessagesSquare, FileCheck2, Presentation } from "lucide-react";
+import { matchPptView, PPT_VIEWS } from "@/lib/pptx/registry";
 
 export interface SessionUser {
   id: string; email: string; name: string; isSuperAdmin: boolean;
@@ -221,6 +222,57 @@ export function AppShell({ user, children, onLogout }: { user: SessionUser; chil
   const [notifCount, setNotifCount] = useState(0);
   const [rtConnected, setRtConnected] = useState(socketState());
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [pptBusy, setPptBusy] = useState(false);
+
+  // Universal "Export PPT view": server-side engine renders the current module as a
+  // presentation-native 16:9 deck — identical output from browser and desktop app.
+  const downloadPpt = async () => {
+    if (pptBusy) return;
+    const hit = matchPptView(route.path);
+    if (!hit || !PPT_VIEWS[hit.view.key]) {
+      toast.error("PPT export isn't available for this view yet.");
+      return;
+    }
+    let projectId: string | null = hit.projectIdFromRoute ?? null;
+    if (!projectId && hit.view.projectScoped) {
+      projectId = typeof window !== "undefined" ? localStorage.getItem("pmct.plan.project") : null;
+    }
+    if (hit.view.projectScoped && !projectId) {
+      toast.error("Pick a project in the header first — this export is project-specific.");
+      return;
+    }
+    setPptBusy(true);
+    try {
+      const token = getToken();
+      const res = await fetch("/api/export/ppt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ view: hit.view.key, projectId }),
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        let msg = `Export failed (${res.status})`;
+        try { const j = await res.json(); if (j?.error) msg = j.error; } catch { /* keep default */ }
+        throw new Error(msg);
+      }
+      const blob = await res.blob();
+      const cd = res.headers.get("Content-Disposition") ?? "";
+      const m = /filename="([^"]+)"/.exec(cd);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = m?.[1] ?? "pmct-export.pptx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      toast.success(`PowerPoint exported — ${hit.view.label}`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "PPT export failed");
+    } finally {
+      setPptBusy(false);
+    }
+  };
 
   // All-tabs PDF export: one report containing every permitted module.
   const downloadAllTabsPdf = async () => {
@@ -415,6 +467,17 @@ export function AppShell({ user, children, onLogout }: { user: SessionUser; chil
               onClick={downloadAllTabsPdf}
             >
               {pdfBusy ? <Loader2 className="h-4 w-4 animate-spin text-blue-600" /> : <FileDown className="h-4 w-4 text-slate-500" />}
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              aria-label="Export current view as PowerPoint"
+              title="Export this view as PowerPoint (16:9)"
+              disabled={pptBusy}
+              onClick={downloadPpt}
+            >
+              {pptBusy ? <Loader2 className="h-4 w-4 animate-spin text-blue-600" /> : <Presentation className="h-4 w-4 text-slate-500" />}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

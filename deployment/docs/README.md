@@ -1,3 +1,5 @@
+> **v3.0 note (2026-09-19):** the canonical, updated version of this document lives in `README.md`. The v3.0 "Command Center" release added agile delivery, omni boards, clients & billing, field operations, strategy & knowledge and proofing — see `CHANGELOG.md` and `docs/COMMAND-CENTER-PRD.md`.
+
 # PM Control Tower — Deployment Pack
 
 One-folder Windows application for **PM CONTROL TOWER**, the enterprise Project,

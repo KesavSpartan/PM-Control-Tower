@@ -1,3 +1,5 @@
+> **v3.0 note (2026-09-19):** this folder describes the v1.0.0 delivery package. The platform is now **v3.0.0 "Command Center"** — see `CHANGELOG.md`, `docs/COMMAND-CENTER-PRD.md` and the refreshed `download/PM-Control-Tower-Documentation-Suite.docx` (regenerated with the v3.0 chapter).
+
 # PM CONTROL TOWER v1.0.0 — Delivery Package
 
 Enterprise Project, Program & Portfolio Management Platform

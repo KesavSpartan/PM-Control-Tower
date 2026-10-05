@@ -1,3 +1,5 @@
+> **v3.0 note (2026-09-19):** the canonical, updated version of this document lives in `docs/09-OPERATIONS-RUNBOOK.md`. The v3.0 "Command Center" release added agile delivery, omni boards, clients & billing, field operations, strategy & knowledge and proofing — see `CHANGELOG.md` and `docs/COMMAND-CENTER-PRD.md`.
+
 # PM Control Tower — Backup & Recovery Guide
 
 Everything that defines your PM Control Tower instance lives **inside the application

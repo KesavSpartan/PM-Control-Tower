@@ -205,12 +205,13 @@ pageNo(s, 6);
 /* ============================================================ S6 · MODULES */
 s = p.addSlide(); s.background = { color: BG };
 kicker(s, "Dashboard & modules");
-slideTitle(s, "One platform, seven governed domains");
+slideTitle(s, "One platform, eight governed domains");
 const domains = [
   ["PORTFOLIO", "Portfolios · Programs · Projects · RAG health · Budgets", BLUE],
   ["PLAN", "Requirements · WBS · Tasks · Schedule · Milestones · Baselines", BLUE],
   ["EXECUTE", "Resources · Timesheets · Work Inbox · Focus Planner", GREEN],
   ["CONTROL", "Financials · EVM · RAID · Change · Gates · Governance", AMBER],
+  ["COMMAND CENTER", "Agile · Boards · Clients & Billing · Field Ops · Strategy · Docs · Proofing", AMBER],
   ["INTELLIGENCE", "Executive Tower · Leadership Pack · Analytics · AI Assistant", BLUE],
   ["CONNECT", "Integrations · Webhooks · Automations · AI Gateway", GREEN],
   ["ADMIN", "Users · Roles · Templates · Audit Trail · Configuration", AMBER],
@@ -218,16 +219,42 @@ const domains = [
 domains.forEach((d, i) => {
   const col = i % 4, row = Math.floor(i / 4);
   const x = M + col * 3.19, y = 1.66 + row * 2.42, w = 2.99, h = 2.2;
-  card(s, x, y, w, h, row === 1 && col === 3 ? TINT : BG, 0.1);
+  card(s, x, y, w, h, d[0] === "COMMAND CENTER" ? BLUE_SOFT : BG, 0.1);
   s.addShape(p.shapes.ROUNDED_RECTANGLE, { x: x + 0.24, y: y + 0.24, w: 0.5, h: 0.5, rectRadius: 0.08, fill: { color: d[2] }, line: { type: "none" } });
-  s.addText(d[0], { x: x + 0.88, y: y + 0.3, w: w - 1.0, h: 0.4, fontFace: F, fontSize: 14, bold: true, charSpacing: 1, color: NAVY_TXT, margin: 0 });
-  s.addText(d[1], { x: x + 0.24, y: y + 0.95, w: w - 0.48, h: 1.1, fontFace: F, fontSize: 12.5, color: MUT, margin: 0 });
+  s.addText(d[0], { x: x + 0.88, y: y + 0.3, w: w - 1.0, h: 0.4, fontFace: F, fontSize: d[0] === "COMMAND CENTER" ? 11.5 : 14, bold: true, charSpacing: 1, color: NAVY_TXT, margin: 0 });
+  s.addText(d[1], { x: x + 0.24, y: y + 0.95, w: w - 0.48, h: 1.1, fontFace: F, fontSize: 12, color: MUT, margin: 0 });
 });
 s.addText([
-  { text: "62 view modules", options: { bold: true, color: BLUE } },
+  { text: "70+ view modules", options: { bold: true, color: BLUE } },
   { text: " — every screen reads from the same engines, so a number changed once is changed everywhere.", options: { color: MUT } },
 ], { x: M, y: 6.6, w: 12.33, h: 0.35, fontFace: F, fontSize: 13, margin: 0 });
 pageNo(s, 7);
+
+/* ============================================================ S6b · COMMAND CENTER v3.0 */
+s = p.addSlide(); s.background = { color: BG };
+kicker(s, "New in v3.0 — the command center");
+slideTitle(s, "Six new execution domains. One Task entity. Zero duplicates.");
+const cc = [
+  ["Agile Delivery", "Sprints, epics, story points, backlog grooming, drag-and-drop sprint board — the same tasks the Gantt and EVM govern", BLUE],
+  ["Boards", "Kanban lanes with drag & drop, delivery calendar, resource workload heatmap — one entity, many views", BLUE],
+  ["Clients & Billing", "Client register, invoices with line items (milestone-tied), expenses with approval workflow", GREEN],
+  ["Field Operations", "RFIs with aging and cost/schedule impact, daily site logs, punch list closeout, BIM model viewer", GREEN],
+  ["Strategy & Knowledge", "Feedback portal with feature voting, quarter roadmap, docs workspace, message boards", AMBER],
+  ["Proofing & Approvals", "Versioned proof rounds with threaded annotations — approve or request changes", AMBER],
+];
+cc.forEach((f, i) => {
+  const col = i % 3, row = Math.floor(i / 3);
+  const x = M + col * 4.28, y = 1.72 + row * 2.14;
+  card(s, x, y, 4.05, 1.92, BG, 0.09);
+  s.addShape(p.shapes.ROUNDED_RECTANGLE, { x: x + 0.24, y: y + 0.24, w: 0.5, h: 0.5, rectRadius: 0.08, fill: { color: f[2] }, line: { type: "none" } });
+  s.addText(f[0], { x: x + 0.88, y: y + 0.28, w: 3.0, h: 0.42, fontFace: F, fontSize: 15, bold: true, color: NAVY_TXT, margin: 0 });
+  s.addText(f[1], { x: x + 0.24, y: y + 0.88, w: 3.6, h: 0.95, fontFace: F, fontSize: 12, color: MUT, margin: 0 });
+});
+s.addText([
+  { text: "Software sprints, client billing and construction RFIs now run on the same record.  ", options: { bold: true, color: NAVY_TXT } },
+  { text: "A status change on any board is instantly visible in the Gantt, EVM and executive tower.", options: { color: MUT } },
+], { x: M, y: 6.42, w: 12.33, h: 0.55, fontFace: F, fontSize: 13, margin: 0 });
+pageNo(s, 8);
 
 /* ============================================================ S7 · HOW EACH FEATURE IS USED */
 s = p.addSlide(); s.background = { color: BG };
@@ -235,7 +262,7 @@ kicker(s, "How each feature is used");
 slideTitle(s, "Built around how each role actually works");
 const roles = [
   ["EXECUTIVE", BLUE, "Opens the Executive Control Tower — exceptions first, RAG with honest GREY, 30/60/90 outlook — decides stage gates, exports the Leadership Pack."],
-  ["PMO ADMIN", AMBER, "Provisions users across 8 roles / 32 permissions, applies PMO templates to new projects, tunes governance thresholds, monitors the audit trail."],
+  ["PMO ADMIN", AMBER, "Provisions users across 8 roles / 43 permissions, applies PMO templates to new projects, tunes governance thresholds, monitors the audit trail."],
   ["PROJECT MANAGER", GREEN, "Builds WBS and CPM schedule, baselines, tracks CPI/SPI and RAID, routes change requests — status writes itself as the team works."],
   ["TEAM MEMBER", BLUE, "Plans the week in Focus Planner, works the personal inbox, files weekly timesheets that flow into real cost and EVM — no separate reporting."],
 ];
@@ -246,7 +273,7 @@ roles.forEach((r, i) => {
   s.addText(r[0], { x: M + 0.22, y: y + 0.265, w: 2.5, h: 0.58, fontFace: F, fontSize: 12.5, bold: true, color: "FFFFFF", align: "center", valign: "middle", margin: 0 });
   s.addText(r[2], { x: M + 3.0, y: y + 0.12, w: 9.1, h: 0.92, fontFace: F, fontSize: 13.5, color: TXT, valign: "middle", margin: 0 });
 });
-pageNo(s, 8);
+pageNo(s, 9);
 
 /* ============================================================ S8 · WORKFLOW & AUTOMATION */
 s = p.addSlide(); s.background = { color: BG };
@@ -286,7 +313,7 @@ autos.forEach((a, i) => {
   s.addText(a[1], { x: x + 2.1, y, w: 3.75, h: 0.52, fontFace: F, fontSize: 12.5, color: TXT, valign: "middle", margin: 0 });
 });
 sourceLine(s, "A Socket.IO realtime gateway pushes every engine result to connected screens instantly.");
-pageNo(s, 9);
+pageNo(s, 10);
 
 /* ============================================================ S9 · BENEFITS */
 s = p.addSlide(); s.background = { color: BG };
@@ -308,7 +335,7 @@ s.addText([
   { text: "GREY honesty: ", options: { bold: true, color: NAVY_TXT } },
   { text: "when data is missing, the tower shows GREY — not a comforting green. Executives trust what they see.", options: { color: MUT } },
 ], { x: M, y: 6.45, w: 12.33, h: 0.4, fontFace: F, fontSize: 13, margin: 0 });
-pageNo(s, 10);
+pageNo(s, 11);
 
 /* ============================================================ S10 · REPORTS & ANALYTICS */
 s = p.addSlide(); s.background = { color: BG };
@@ -341,7 +368,7 @@ reps.forEach((r, i) => {
   s.addText(r[1], { x: 7.75, y: y + 0.4, w: 4.9, h: 0.34, fontFace: F, fontSize: 11.5, color: MUT, margin: 0 });
 });
 sourceLine(s, "Chart: reference deployment sample data (illustrative).");
-pageNo(s, 11);
+pageNo(s, 12);
 
 /* ============================================================ S11 · ROI */
 s = p.addSlide(); s.background = { color: BG };
@@ -375,7 +402,7 @@ s.addText([
   { text: "One platform replaces spreadsheet sprawl and tool patchworks", options: { bullet: bu() } },
 ], { x: 7.8, y: 4.8, w: 4.75, h: 1.6, fontFace: F, fontSize: 12.5, color: TXT, paraSpaceAfter: 8, margin: 0 });
 sourceLine(s, "Hour figures are illustrative estimates; the 9.9% waste figure is sourced (PMI, 2018).");
-pageNo(s, 12);
+pageNo(s, 13);
 
 /* ============================================================ S12 · USE CASES */
 s = p.addSlide(); s.background = { color: BG };
@@ -395,7 +422,7 @@ cases.forEach((c, i) => {
   s.addText(c[0], { x: x + 1.0, y: y + 0.3, w: 4.8, h: 0.55, fontFace: F, fontSize: 15.5, bold: true, color: NAVY_TXT, valign: "middle", margin: 0 });
   s.addText(c[1], { x: x + 0.25, y: y + 1.05, w: 5.5, h: 1.05, fontFace: F, fontSize: 12.5, color: MUT, margin: 0 });
 });
-pageNo(s, 13);
+pageNo(s, 14);
 
 /* ============================================================ S13 · WHY ADOPT (dark) */
 s = p.addSlide(); s.background = { color: DARK };
@@ -415,7 +442,7 @@ whys.forEach((wv, i) => {
   s.addText(wv[0], { x: x + 0.3, y: y + 0.16, w: 5.4, h: 0.34, fontFace: F, fontSize: 15, bold: true, color: AMBER, margin: 0 });
   s.addText(wv[1], { x: x + 0.3, y: y + 0.54, w: 5.4, h: 0.75, fontFace: F, fontSize: 12.5, color: "C9D6E8", margin: 0 });
 });
-pageNo(s, 14);
+pageNo(s, 15);
 
 /* ============================================================ S14 · IMPLEMENTATION */
 s = p.addSlide(); s.background = { color: BG };
@@ -442,7 +469,7 @@ s.addText([
   { text: "Included from day one:  ", options: { bold: true, color: NAVY_TXT } },
   { text: "reference enterprise dataset  ·  10-product documentation set  ·  operations runbook  ·  audit-ready event history  ·  executive demo data", options: { color: TXT } },
 ], { x: M + 0.35, y: 5.35, w: 11.7, h: 1.1, fontFace: F, fontSize: 13.5, valign: "middle", margin: 0 });
-pageNo(s, 15);
+pageNo(s, 16);
 
 /* ============================================================ S15 · SECURITY & SCALE */
 s = p.addSlide(); s.background = { color: BG };
@@ -465,7 +492,7 @@ secs.forEach((sec, i) => {
   s.addText(sec[1], { x: x + 0.62, y: y + 0.54, w: 5.15, h: 0.8, fontFace: F, fontSize: 12.5, color: MUT, margin: 0 });
 });
 sourceLine(s, "Platform detail: PM Control Tower security & architecture documentation (v1.0.0).");
-pageNo(s, 16);
+pageNo(s, 17);
 
 /* ============================================================ S16 · DIFFERENTIATION */
 s = p.addSlide(); s.background = { color: BG };
@@ -482,6 +509,7 @@ s.addTable([
   [lb("Governance & alerts"), pm("Rules engine → inbox"), td("None"), td("Batch reports next day")],
   [lb("Audit trail"), pm("Every change recorded"), td("None"), td("Partial")],
   [lb("Leadership reporting"), pm("One-click, versioned"), td("Hand-built decks"), td("Consultant-configured")],
+  [lb("Delivery breadth"), pm("PPM + Agile + Commerce + Field ops + Proofing, one model"), td("Tasks only"), td("PPM silos; agile/CRM separate products")],
   [lb("Realtime updates"), pm("Live via gateway"), td("Stale on arrival"), td("Nightly synchronization")],
   [lb("Hosting"), pm("Self-hosted or your cloud"), td("n/a"), td("Vendor cloud only")],
 ], { x: M, y: 1.62, w: 12.33, colW: [2.7, 3.31, 3.16, 3.16], rowH: 0.52, border: { pt: 0.75, color: LINE }, fill: { color: "FFFFFF" }, margin: 0.06 });
@@ -489,7 +517,7 @@ s.addText([
   { text: "The difference that matters:  ", options: { bold: true, color: NAVY_TXT } },
   { text: "PM Control Tower computes the truth instead of collecting it.", options: { color: MUT } },
 ], { x: M, y: 6.6, w: 12.33, h: 0.35, fontFace: F, fontSize: 13, margin: 0 });
-pageNo(s, 17);
+pageNo(s, 18);
 
 /* ============================================================ S17 · CTA (dark) */
 s = p.addSlide(); s.background = { color: DARK };

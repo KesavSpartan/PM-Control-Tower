@@ -1,3 +1,5 @@
+> **v3.0 note (2026-09-19):** the canonical, updated version of this document lives in `docs/11-INTEGRITY-AND-TRUST.md`. The v3.0 "Command Center" release added agile delivery, omni boards, clients & billing, field operations, strategy & knowledge and proofing — see `CHANGELOG.md` and `docs/COMMAND-CENTER-PRD.md`.
+
 # 11 — INTEGRITY & TRUST (The Integrity Layer)
 
 The Integrity Layer is what makes PM Control Tower the only enterprise PPM platform

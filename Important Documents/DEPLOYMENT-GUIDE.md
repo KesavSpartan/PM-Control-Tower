@@ -1,3 +1,5 @@
+> **v3.0 note (2026-09-19):** the canonical, updated version of this document lives in `docs/01-DEPLOYMENT-GUIDE.md`. The v3.0 "Command Center" release added agile delivery, omni boards, clients & billing, field operations, strategy & knowledge and proofing — see `CHANGELOG.md` and `docs/COMMAND-CENTER-PRD.md`.
+
 # 01 — Deployment Guide
 
 PM CONTROL TOWER ships as a self-contained package with three supported deployment

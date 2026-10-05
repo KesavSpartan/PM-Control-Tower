@@ -1,5 +1,11 @@
 # MASTER DEVELOPMENT PROMPT v2 — PM CONTROL TOWER "MARKET LEADER" PROGRAM
 
+> **Status note (2026-09-19, v3.0):** this was the v2 program charter. The v3.0
+> "Command Center" expansion has since shipped the omni-functional scope (agile,
+> omni views, product strategy, docs/boards, clients/billing, field ops, proofing).
+> Current capabilities and architecture: `docs/COMMAND-CENTER-PRD.md` and
+> `docs/12-MASTER-PLATFORM-AUDIT.md`. Phases below are preserved as history.
+
 ## CONTEXT (DO NOT REGRESS)
 PM Control Tower v1.9.2 already ships: connected delivery model (Portfolio→Program→Project→WBS→Task→Dependency→Milestone→Resource→Timesheet→Cost→EVM→Health→Governance→Benefits), CPM Gantt, EVM engine, S-Curve + forecast controls, the Integrity Layer (freshness engine, evidence bundles, P80 Monte Carlo, calibration, scenario sandbox, draft-first AI + learning memory, data quality), Technology tower, Reporting Center (177 templates + viewer + print/PDF), Prioritization engine + budget-constrained selection, Investment & Business Case (ROI/NPV/IRR/payback), 27-connector catalog, Admin Control Center metadata layer (field builder, naming conventions, terminology, feature flags — server-side enforced), 40/40 engine tests.
 

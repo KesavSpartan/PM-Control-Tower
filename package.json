@@ -1,6 +1,6 @@
 {
   "name": "pm-control-tower",
-  "version": "1.0.0",
+  "version": "3.1.0",
   "private": true,
   "description": "PM CONTROL TOWER — Enterprise Project, Program & Portfolio Management Platform (Portfolio → Program → Project → WBS → Schedule → EVM → Governance → Leadership Reporting)",
   "engines": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "next build && node -e \"const fs=require('fs');fs.cpSync('.next/static','.next/standalone/.next/static',{recursive:true});fs.cpSync('public','.next/standalone/public',{recursive:true})\"",
+    "build": "next build && node -e \"const fs=require('fs');const d=process.env.PMCT_DIST_DIR||'.next';fs.cpSync(d+'/static', d+'/standalone/.next/static',{recursive:true});fs.cpSync('public', d+'/standalone/public',{recursive:true})\"",
     "start": "node .next/standalone/server.js",
     "start:bun": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
     "realtime": "bun mini-services/realtime/index.ts",
@@ -20,6 +20,7 @@
     "seed:integrity": "tsx scripts/seed-integrity.ts",
     "seed:command-center": "tsx scripts/seed-command-center.ts",
     "sync:rbac": "tsx scripts/sync-rbac.ts",
+    "seed:strategy": "tsx scripts/seed-strategy.ts",
     "db:push": "prisma db push --accept-data-loss",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
@@ -76,6 +77,7 @@
     "next-auth": "^4.24.11",
     "next-intl": "^4.3.4",
     "next-themes": "^0.4.6",
+    "pptxgenjs": "^4.0.1",
     "prisma": "^6.11.1",
     "react": "^19.0.0",
     "react-day-picker": "^9.8.0",

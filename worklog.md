@@ -522,3 +522,19 @@ Work Log:
 
 Stage Summary:
 - PM Control Tower v3.0.0 "Command Center": 115 models, 167 route files, 8 new views, agile + omni views + strategy + knowledge + commercial + field ops + proofing all live on the single Task core; docs/sales collateral updated; backup taken before updates
+
+---
+Task ID: 25
+Agent: main (Super Z)
+Task: Full application backup + Windows deployment pack (exe + formats)
+
+Work Log:
+- Backup tooling: scripts/backup-app.ps1 (+ scripts/vacuum-db-snapshot.ts) - two archives per run in backups/: pmct-backup-<stamp>.zip (consistent online DB snapshot via SQLite VACUUM INTO + .env + schema + manifest) and pmct-app-backup-<stamp>.zip (full source/docs/sales assets/config; excludes node_modules/.next/.git/dist). Executed: pmct-backup-20260920-005512.zip (422KB) + pmct-app-backup-20260920-005512.zip (36.7MB, SHA256 1BCBB07D...63DB). Get-AppVersion "unknown" in pack context - script now reads package.json version directly.
+- package.json version 1.0.0 -> 3.0.0 (pack naming correctness; pack.ps1 names the zip from package.json version / git tag)
+- Build isolation: package.json build script + deployment/pack.ps1 now honor PMCT_DIST_DIR (default .next unchanged) so pack/certification builds never clobber a running dev server's .next
+- Windows deployment pack: PMCT_DIST_DIR=.next-prod powershell deployment/pack.ps1 -> dist/PM-Control-Tower-Deploy-v3.0.0-2026-09-20_0003-20260920-0056.zip (101.2 MB, SHA256 8574687B...9910). Contents: PM-Control-Tower.exe (Node SEA, postject-injected, smoke-tested "v3.0.0"), deploy/start/stop/backup/restore/healthcheck/autostart cmd launchers, scripts/*.ps1, app/ standalone server (208MB incl. traced node_modules), prisma/schema.prisma, db/custom.db snapshot, .env.example, docs/
+- Boot test of the extracted pack: exe --version OK; server up; /api/system/ready 200 (bundled snapshot: 15 users/7 projects/606 tasks); login OK; leadership API + UI title verified; cleaned up test dir + .next-prod
+- Cleanup: removed .next-prod after pack; dist zip retained as the deployment artifact
+
+Stage Summary:
+- v3.0.0 fully packaged for Windows: one-click exe + cmd toolchain zip in dist/, full app + system backups in backups/, everything SHA256-stamped

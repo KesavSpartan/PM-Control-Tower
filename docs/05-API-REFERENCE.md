@@ -157,6 +157,7 @@ All routes follow the standard conventions (JWT → RBAC → zod → audit → r
 |---|---|---|
 | `GET /api/export/[entity]` | GET | CSV export (UTF-8 BOM) — `?format=json` for all fields, `?template=1` import template, `?meta=1` column metadata. 22 entities. Audited `EXPORT`. |
 | `POST /api/import/[entity]` | POST | `{rows, mode:"validate"|"apply"}` — dry-run validation (rolled-back transaction) then transactional upsert. 13 master-data entities. Audited `IMPORT` + `data:imported` event. |
+| `POST /api/export/ppt` | POST | **Universal PowerPoint export (v3.1)** — `{ view, projectId? }` → 16:9 `.pptx` deck (cover with project metadata, KPI cards, auto-paginated tables, native charts, multi-slide Gantt). 40+ views listed in `src/lib/pptx/registry.ts`; server-side engine so web and desktop output is identical. Permission ANY-of `reports.view`/`project.view`; audited; 20/min. |
 
 ---
 

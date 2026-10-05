@@ -1,3 +1,5 @@
+> **v3.0 note (2026-09-19):** the canonical, updated version of this document lives in `docs/12-MASTER-PLATFORM-AUDIT.md`. The v3.0 "Command Center" release added agile delivery, omni boards, clients & billing, field operations, strategy & knowledge and proofing — see `CHANGELOG.md` and `docs/COMMAND-CENTER-PRD.md`.
+
 # 12 — MASTER PLATFORM AUDIT (Enterprise Control Tower coverage)
 
 Audit of the 42-section master development prompt against the implemented platform (v1.2.2).

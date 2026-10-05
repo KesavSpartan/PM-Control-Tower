@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 3.1.0 - UNIVERSAL POWERPOINT EXPORT (2026-09-20)
+
+Export any module as a presentation-native 16:9 deck, from the browser dashboard AND the Windows desktop application - both call the same server-side engine, so output is identical.
+
+- **Universal availability**: standardized Export-PPT button in the app shell topbar; maps the current route to an exportable view and the current project context automatically.
+- **42 exportable views**: executive + leadership towers, portfolios, programs, projects, strategy, prioritization, investment; project full-deck (overview, Gantt, dependencies, milestones, financials + EVM, RAID, changes, gates, agile, deliverables); requirements, WBS, tasks, schedule, milestones, baselines, project financials, EVM, health, RAID, changes, gates, agile, boards, field ops, proofing; portfolio financials, clients + billing, resources, workload, timesheets, governance, decisions, actions, KPIs, feedback, roadmap, docs, CTO tower, analytics.
+- **Intelligent data fitting**: fixed row budgets per slide with repeated headers and per-column character budgets (never wraps or overlaps); Gantt renders as native shapes on a real month/date axis with today marker, critical path, progress fills and milestone diamonds, split across parts sharing one axis so bars align; charts are native PPT vector charts (doughnut, bar, line).
+- **Project-specific alignment**: cover slide with project metadata (status/phase, health RAG, budget vs actual vs forecast, dates, strategic objective), project line in every slide header, confidentiality footer from Admin Settings, automatic slide numbers.
+- **API**: POST /api/export/ppt { view, projectId? } (reports.view or project.view; audited EXPORT; 20/min rate limit).
+- Engine: src/lib/engines/pptx.ts + pptx-views.ts (pptxgenjs, serverExternalPackages-isolated); registry src/lib/pptx/registry.ts.
+
 ## 3.0.0 — COMMAND CENTER EXPANSION (2026-09-19)
 
 Omni-functional unified execution platform release: closes the six missing capability clusters vs the 40-app "Command Center" mega-scope, all on the single Project/Task core (see `docs/COMMAND-CENTER-PRD.md` for the full PRD, architecture, ERD and per-app coverage matrix).

@@ -11,6 +11,19 @@ const row = (cells, header = false) => new TableRow({ children: cells.map((c) =>
 const tbl = (rows) => new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } });
 
 const sections = [
+    { id: "CMD-CENTER", title: "Command Center v3.0 (agile, boards, commerce, field, strategy, proofing)", cases: [
+    ["TC-CC-01", "GET all 13 new endpoints (agile, clients, invoices, expenses, rfis, daily-logs, punch-list, feedback, roadmap, docs, message-boards, proofing, capacity)", "200 success:true each", "PASS", "13/13 live on :3111"],
+    ["TC-CC-02", "PATCH /api/agile card move (status IN_PROGRESS)", "200; status updated; sprint points recomputed", "PASS", "Live"],
+    ["TC-CC-03", "Feedback vote toggle (on, off)", "votesCount +1 then reset; one vote per user", "PASS", "Live"],
+    ["TC-CC-04", "Message board reply", "201; replyCount + lastActivityAt update", "PASS", "Live"],
+    ["TC-CC-05", "Invoice SENT -> PAID", "PAID + paidAt stamped; further change rejected (locked)", "PASS", "Live"],
+    ["TC-CC-06", "RFI answer workflow", "ANSWERED + dateAnswered stamped", "PASS", "Live"],
+    ["TC-CC-07", "Proof round approve + annotation resolve", "decisionAt stamped; annotation resolved", "PASS", "Live"],
+    ["TC-CC-08", "Sprint create -> delete with tasks", "Tasks returned to backlog (sprintId null)", "PASS", "Live"],
+    ["TC-CC-09..12", "RBAC negatives as TEAM_MEMBER: invoices / RFIs / feedback triage / card move", "403 on manage routes; 404-through on allowed paths (members may move cards, vote)", "PASS", "Live RBAC matrix"],
+    ["TC-CC-13", "Second ACTIVE sprint on same project", "400 Only one active sprint per project", "PASS", "Server guard"],
+    ["TC-CC-20..30", "UI E2E all 8 new views (boards kanban/calendar/workload, agile, clients, field, feedback, docs, boards-hub, proofing) + project pickers", "Views render with seeded data; screenshots gui-test-screenshots/", "PASS", "Browser pass t1..t11"],
+  ]},
   { id: "AUTH", title: "Authentication & RBAC", cases: [
     ["TC-AUTH-01", "Login pmo@pmct.io with correct password", "200 + JWT; dashboard loads", "PASS", "Live session verified in browser"],
     ["TC-AUTH-02", "Login with wrong password", "401, no token", "PASS", "Verified during E2E"],
@@ -119,6 +132,6 @@ const doc = new Document({
 });
 
 Packer.toBuffer(doc).then((buf) => {
-  fs.writeFileSync("../Important Documents/PM-Control-Tower-Test-Report.docx", buf);
+  fs.writeFileSync(process.env.TS_OUT || "../Important Documents/PM-Control-Tower-Test-Report.docx", buf);
   console.log("WROTE ../PM-Control-Tower-Test-Report.docx (" + Math.round(buf.length / 1024) + " KB)");
 });

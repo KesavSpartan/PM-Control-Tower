@@ -9,7 +9,7 @@ const {
 // ============ 7. SECURITY ARCHITECTURE ============
 CH.push(h1("7", "Security Architecture"));
 CH.push(h2("7.1", "Identity and Access"));
-CH.push(body("Authentication uses JSON Web Tokens signed with HS256 (jose library), a twelve-hour expiry, and an issuer check. Tokens are returned to the client and additionally set as httpOnly, SameSite=Lax cookies. Passwords are hashed with bcrypt (cost 10). Login attempts are rate limited and failed-login counters are recorded. Authorization is role-based: eight system roles (Executive, PMO Administrator, Portfolio Manager, Program Manager, Project Manager, Finance Controller, Team Member, Auditor) map to a catalog of thirty-two permission codes across executive, portfolio, project, planning, execution, control, connect and administration categories. The API wrapper enforces the permission on every endpoint; super-admin status is a deliberate, auditable flag. SSO/OIDC is implemented at the gateway level as an integration category for enterprise identity providers."));
+CH.push(body("Authentication uses JSON Web Tokens signed with HS256 (jose library), a twelve-hour expiry, and an issuer check. Tokens are returned to the client and additionally set as httpOnly, SameSite=Lax cookies. Passwords are hashed with bcrypt (cost 10). Login attempts are rate limited and failed-login counters are recorded. Authorization is role-based: eight system roles (Executive, PMO Administrator, Portfolio Manager, Program Manager, Project Manager, Finance Controller, Team Member, Auditor) map to a catalog of forty-three permission codes across executive, portfolio, project, planning, execution, control, connect, strategy, knowledge and administration categories. The API wrapper enforces the permission on every endpoint; super-admin status is a deliberate, auditable flag. SSO/OIDC is implemented at the gateway level as an integration category for enterprise identity providers."));
 CH.push(h2("7.2", "Platform Controls"));
 CH.push(bullet("Every input validated with Zod schemas; unknown or malformed fields rejected with 400 responses.", "Request validation"));
 CH.push(bullet("Per-IP, per-route sliding windows; login endpoints have stricter limits.", "Rate limiting"));
@@ -150,6 +150,24 @@ CH.push(bullet("The health score blends cost, schedule, risk, issues, milestones
 CH.push(h2("16.3", "Decision Rhythm"));
 CH.push(body("Executives own gate decisions and change approvals above threshold. The Governance Queue on the dashboard lists exactly what awaits a decision, each item linked to its evidence pack. Because every figure traces to operational data through audited engines, the executive conversation moves from debating status to choosing action. That is the promise of the control tower: one platform, complete project intelligence, greater outcomes."));
 
+// ============ 17. COMMAND CENTER EXPANSION (v3.0) ============
+CH.push(h1("17", "Command Center Expansion (v3.0)"));
+CH.push(body("Release 3.0 extends the platform from enterprise PPM into an omni-functional execution suite, codenamed the Command Center. The guiding principle is unchanged: a single Task entity is the atom of delivery, and every new module is another governed lens over it. Nothing duplicates data; a status change made anywhere is immediately visible everywhere."));
+CH.push(h2("17.1", "Agile Delivery"));
+CH.push(body("Sprints carry a goal and a date window with one active sprint per project; epics group work into color-coded business themes; tasks gain story points and backlog order. The sprint board offers drag-and-drop status moves with optimistic updates, and committed points are recomputed server-side on every move. The backlog view supports grooming with a Fibonacci point scale and pull-into-sprint actions."));
+CH.push(h2("17.2", "Omni Task Views"));
+CH.push(body("The Boards module renders the same task register as a Kanban with status lanes and drag-and-drop, a delivery calendar of task due dates and meetings, and a workload heatmap of allocated hours against weekly capacity with over-allocation flagged. Views filter across all projects or focus on one."));
+CH.push(h2("17.3", "Commercial Operations"));
+CH.push(body("A client register with status and revenue roll-ups; invoices with line items whose subtotal, tax and total are computed server-side, with a Draft-Sent-Paid lifecycle in which paid invoices are locked; and expenses with a pending-approved-reimbursed approval workflow whose approver is stamped automatically. Invoice lines can reference the project or task they bill."));
+CH.push(h2("17.4", "Field Operations (Construction)"));
+CH.push(body("Requests for information carry discipline routing, aging with a red flag past seven days unanswered, and cost plus schedule impact totals. Daily site logs record weather, crew counts, work performed, delays and safety incidents. The punch list closes out quality items through an open, in-progress, closed, verified chain. A BIM viewer tab embeds an Autodesk Construction Cloud or equivalent model URL for field-to-office coordination."));
+CH.push(h2("17.5", "Strategy and Knowledge"));
+CH.push(body("A feedback portal collects bug reports, feature requests and ideas with one vote per user and a triage lifecycle; a quarter-based roadmap links demand to delivery with progress and release tags. A docs workspace organizes markdown pages into six spaces with full-text search and live preview, and message boards host pinned announcements, standups and question threads anchored to projects."));
+CH.push(h2("17.6", "Proofing and Approvals"));
+CH.push(body("Deliverables gain versioned proof rounds with automatic round numbering, reviewer and due date. Reviewers add threaded annotations carrying page or timecode locators that can be resolved after rework; rounds end in an approved or changes-requested decision and can be reopened."));
+CH.push(h2("17.7", "Permissions and Upgrade Path"));
+CH.push(body("Seven new permission codes gate the new modules: agile.manage, client.manage, field.manage, product.manage, docs.use, boards.use and proofing.manage, mapped into all eight role templates. Upgrading an existing installation is additive: prisma db push for the schema, npm run sync:rbac to provision the permission catalog without a reseed, and an optional idempotent command-center seed for demonstration data."));
+
 // ============ Front matter ============
 const frontMatter = [
   new Paragraph({
@@ -258,7 +276,7 @@ const doc = new Document({
 });
 
 Packer.toBuffer(doc).then((buf) => {
-  fs.mkdirSync("/home/z/my-project/download", { recursive: true });
-  fs.writeFileSync("/home/z/my-project/download/PM-Control-Tower-Documentation-Suite.docx", buf);
+  fs.mkdirSync("download", { recursive: true });
+  fs.writeFileSync("download/PM-Control-Tower-Documentation-Suite.docx", buf);
   console.log("docx written:", buf.length, "bytes");
 });

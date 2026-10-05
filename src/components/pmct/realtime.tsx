@@ -1,11 +1,16 @@
 "use client";
 // PM CONTROL TOWER — Socket.IO realtime connector (client side)
-// Connects via the gateway: io("/?XTransformPort=3003"), authenticated with JWT.
+// Default: io("/?XTransformPort=3003") — the reverse-proxy convention (nginx/Caddy
+// forwards /socket.io/ to the gateway port). In environments without a proxy (bare
+// dev sandbox), set NEXT_PUBLIC_REALTIME_URL (e.g. http://127.0.0.1:3003) to
+// connect straight to the gateway.
 
 import { useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 import { connectRealtime, registerSocketConnector, dispatchRealtime, setSocketState } from "@/lib/client";
 import { toast } from "sonner";
+
+const RT_URL = process.env.NEXT_PUBLIC_REALTIME_URL || "/?XTransformPort=3003";
 
 let socket: Socket | null = null;
 
@@ -13,7 +18,7 @@ export function RealtimeConnector({ token, userId, roles }: { token: string; use
   useEffect(() => {
     registerSocketConnector((t: string) => {
       if (socket) { socket.disconnect(); socket = null; }
-      socket = io("/?XTransformPort=3003", {
+      socket = io(RT_URL, {
         path: "/socket.io/",
         auth: { token: t },
         reconnectionAttempts: 5,

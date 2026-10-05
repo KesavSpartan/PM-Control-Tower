@@ -212,7 +212,31 @@ screens (users/roles/templates/audit) — see the Admin Guide.
 
 ---
 
-## 10. Daily habits that make the tower work
+## 10. Universal PowerPoint export (v3.1)
+
+The **Export PPT button** in the topbar (next to the PDF button) exports the module you
+are looking at as a presentation-ready 16:9 deck — no screenshots, no manual adjustment:
+
+- **What you get**: a cover slide with project metadata (status, phase, health RAG,
+  budget vs actual vs forecast, dates, strategic objective), section dividers, KPI
+  cards, native editable PPT charts (health distribution, EVM trend, budget vs actual),
+  cleanly paginated data tables (headers repeated on every part, fixed row budgets —
+  nothing overflows), and a **multi-slide Gantt** on a real date axis with month
+  gridlines, today marker, critical path, progress fills and milestone diamonds.
+- **Where it works**: every major module — executive and leadership towers, portfolio/
+  program/project registers, the full project report (18+ slides), planning views,
+  agile, boards, financials, clients & billing, resources/workload, field operations,
+  proofing, governance, registers, feedback and roadmap. Views needing a project use
+  the project selected in the header.
+- **Web and desktop are identical**: the deck is generated server-side by the same
+  engine behind `POST /api/export/ppt`, so the browser dashboard and the Windows
+  application produce the same file for the same data.
+- Permissions: `reports.view` or `project.view`; exports are audited (EXPORT) and
+  rate-limited to 20 per minute.
+
+---
+
+## 11. Daily habits that make the tower work
 
 1. Teams file timesheets weekly (approvals drive actuals → EVM → health).
 2. PMs keep RAID + decisions current (the tower reads them — gaps show as GREY).

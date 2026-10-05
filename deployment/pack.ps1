@@ -30,7 +30,11 @@ $RepoRoot = Split-Path -Parent $PSScriptRoot       # deployment\ -> repo root
 Push-Location $RepoRoot
 try {
   $version = (Get-Content (Join-Path $RepoRoot "package.json") -Raw | ConvertFrom-Json).version
-  try { $describe = git describe --tags --abbrev=0 2>$null; if ($LASTEXITCODE -eq 0 -and $describe) { $version = $describe.TrimStart("v") } } catch {}
+  # package.json is the app-version source of truth; a matching git tag is used only
+  # as a fallback when package.json still carries the placeholder version.
+  if ($version -eq "1.0.0") {
+    try { $describe = git describe --tags --abbrev=0 2>$null; if ($LASTEXITCODE -eq 0 -and $describe) { $version = $describe.TrimStart("v") } } catch {}
+  }
   $stamp    = Get-Date -Format "yyyyMMdd-HHmm"
   $zipName  = "PM-Control-Tower-Deploy-v$version-$stamp.zip"
   $stage    = Join-Path $env:TEMP "pmct-pack-$([guid]::NewGuid().ToString('N').Substring(0,8))\PM-Control-Tower"
@@ -38,7 +42,9 @@ try {
   Write-Host "[pack] PM Control Tower v$version — building deployment package" -ForegroundColor Cyan
 
   # ---- 1. production build ---------------------------------------------------
-  $standalone = Join-Path $RepoRoot ".next\standalone"
+  # Honor PMCT_DIST_DIR so certification/pack builds never disturb a running dev server.
+  $distDir = if ($env:PMCT_DIST_DIR) { $env:PMCT_DIST_DIR } else { ".next" }
+  $standalone = Join-Path $RepoRoot (Join-Path $distDir "standalone")
   if (-not $NoBuild -or -not (Test-Path (Join-Path $standalone "server.js"))) {
     Write-Host "[pack] npm run build (this can take a few minutes)..." -ForegroundColor Cyan
     npm run build
